@@ -1,0 +1,71 @@
+body { 
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background-color: #76696932;
+}
+
+.auth-container {
+  display: flex;
+  height: 100vh;
+}
+
+.form-section {
+  flex: 0.40;
+  padding: 60px;
+  background-color: #877b7beb;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  position: relative; /* nécessaire pour placer le logo en absolu à l’intérieur */
+}
+
+.form-section h2 {
+  margin-bottom: 20px;
+}
+
+.form-section form {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-section label {
+  margin-bottom: 5px;
+  font-weight: bold;
+}
+
+.form-section input {
+  margin-bottom: 15px;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.form-section button {
+  padding: 10px;
+  background-color: #45434388;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.form-section button:hover {
+  background-color: #a7b0b7;
+}
+
+
+/* SECTION IMAGE */
+.image-section {
+  flex: 0.60;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  padding: 50px;
+}
+
+.main-image {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit:cover;
+  zoom:1.5;
+}
