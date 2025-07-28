@@ -5,7 +5,7 @@
   "scripts": {
     "start": "concurrently \"npm run start-backend\" \"npm run start-frontend\"",
     "start-backend": "cd server && node app.js",
-    "start-frontend": "cd client && npm start"
+    "start-frontend": "cd react-client && npm start"
   },
   "author": "",
   "license": "ISC",
@@ -16,8 +16,8 @@
     "cors": "^2.8.5",
     "ejs": "^3.1.10",
     "express": "^5.1.0",
-    "mssql": "^11.0.1",
-    "react-router-dom": "^7.7.1"
+    "mssql": "^11.0.1"
+
   },
   "devDependencies": {
     "concurrently": "^9.2.0"

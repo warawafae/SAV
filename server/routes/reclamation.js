@@ -59,5 +59,30 @@ router.post("/add", async (req, res) => {
     res.status(500).json({ error: "Erreur serveur." });
   }
 });
+router.get("/:enseigne", async (req, res) => {
+  const enseigne = req.params.enseigne.toLowerCase();
+  let db, table;
 
+  if (enseigne === "electroplanet") {
+    db = dbElectroplanet;
+    table = "electroplanet_reclamations";
+  } else if (enseigne === "marjane") {
+    db = dbMarjane;
+    table = "marjane_reclamations";
+  } else {
+    return res.status(400).json({ error: "Enseigne invalide" });
+  }
+
+  try {
+    const result = await db.query(`
+      SELECT * FROM ${table} 
+      ORDER BY date_reclamation DESC
+    `);
+
+    res.json(result.recordset);
+  } catch (err) {
+    console.error("Erreur récupération réclamations :", err);
+    res.status(500).json({ error: "Erreur serveur" });
+  }
+});
 module.exports = router;

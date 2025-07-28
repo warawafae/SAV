@@ -1,16 +1,26 @@
-import React, { useState, useEffect } from 'react';
-import ReclamationForm from './ReclamationForm';
-import HistoriqueTable from './HistoriqueTable';
+import React, { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
+import ReclamationForm from "./ReclamationForm";
+import HistoriqueTable from "./HistoriqueTable";
 
-function ResponsablePage({ nomResponsable, enseigne }) {
+function ResponsablePage() {
+  const [searchParams] = useSearchParams();
+  const enseigne = searchParams.get("enseigne");
+  const nomResponsable = searchParams.get("nom");
+
   const [reclamations, setReclamations] = useState([]);
   const [afficherFormulaire, setAfficherFormulaire] = useState(false);
 
   useEffect(() => {
-    fetch(`/api/reclamations/${enseigne}`)
-      .then(res => res.json())
-      .then(data => setReclamations(data))
-      .catch(err => console.error(err));
+    if (enseigne) {
+      fetch(`/api/reclamations/${enseigne}`)
+        .then(res => {
+          if (!res.ok) throw new Error("Erreur réseau");
+          return res.json();
+        })
+        .then(data => setReclamations(data))
+        .catch(console.error);
+    }
   }, [enseigne]);
 
   const handleNewReclamation = (newRec) => {
@@ -18,19 +28,22 @@ function ResponsablePage({ nomResponsable, enseigne }) {
   };
 
   return (
-    <div>
-      <h2>Bienvenue {nomResponsable}</h2>
-      <button onClick={() => setAfficherFormulaire(!afficherFormulaire)}>
-        Créer une réclamation
-      </button>
+  <div>
+    <h2>Bienvenue {nomResponsable}</h2>
+    <button onClick={() => setAfficherFormulaire(!afficherFormulaire)}>
+      Créer une réclamation
+    </button>
 
-      {afficherFormulaire && (
-        <ReclamationForm enseigne={enseigne} onSuccess={handleNewReclamation} />
-      )}
+    {afficherFormulaire && (
+      <ReclamationForm enseigne={enseigne} onSuccess={handleNewReclamation} />
+    )}
 
-      <HistoriqueTable data={reclamations} />
-    </div>
-  );
+    {/* Titre affiché avant le tableau */}
+    <h3>Historique de réclamation</h3>
+    <HistoriqueTable data={reclamations} />
+  </div>
+);
+
 }
 
 export default ResponsablePage;
