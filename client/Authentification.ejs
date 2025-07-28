@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Service Après-Vente</title>
+  <link rel="stylesheet" href="/css/stylehome.css" />
+</head>
+<body>
+  <div class="auth-container">
+    <!-- Formulaire à gauche -->
+    <div class="form-section">
+      <h2>Connexion</h2>
+      <form action="/login" method="POST">
+        <label for="enseigne">Enseigne</label>
+        <select id="enseigne" name="enseigne" onchange="updateMagasins()" required>
+          <option value="">-- Choisir un enseigne --</option>
+          <option value="electroplanet">Electoplanet</option>
+          <option value="marjane">Marjane</option>
+        </select>
+
+        <label for="magasin">Nom du magasin</label>
+        <select id="magasin" name="magasin" required>
+          <option value="">-- Choisir un magasin --</option>
+        </select>
+        <label for="nomresponsable">Nom du responsable</label>
+        <input type="text" name="nom_responsable" placeholder="Nom complet du responsable" required>
+        <label for="password">Mot de passe</label>
+        <input type="password" id="password" name="password" required>
+
+        <button type="submit">Se connecter</button>
+      </form>
+    </div>
+
+  <div class="image-section">
+    <img src="/img/marjane_group_logo-removebg-preview.png" alt="Image Auth" class="main-image">
+  </div>
+  </div>
+  <script>
+  document.getElementById('enseigne').addEventListener('change', async function () {
+    const enseigne = this.value;
+    const magasinSelect = document.getElementById('magasin');
+
+    // Vider l’ancien contenu
+    magasinSelect.innerHTML = '<option value="">Chargement...</option>';
+
+    if (!enseigne) return;
+
+    try {
+      const response = await fetch(`/api/magasins/${enseigne}`);
+      const data = await response.json();
+
+      // Vider la liste
+      magasinSelect.innerHTML = '<option value="">-- Choisir un magasin --</option>';
+
+      data.magasins.forEach(nom => {
+        const option = document.createElement('option');
+        option.value = nom;
+        option.textContent = nom;
+        magasinSelect.appendChild(option);
+      });
+    } catch (err) {
+      magasinSelect.innerHTML = '<option value="">Erreur</option>';
+      console.error(err);
+    }
+  });
+</script>
+</body>
+</html>

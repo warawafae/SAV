@@ -10,19 +10,16 @@ const config = {
     trustServerCertificate: true
   }
 };
-const poolPromise = new sql.ConnectionPool(config)
-    .connect()
-    .then(pool => {
-        console.log('Connected to SQL Server');
-        return pool;
-    })
-    .catch(err => console.log('Database connection failed: ', err));
-
-module.exports = {
-    sql, poolPromise
-};
-
-/*const pool = new sql.ConnectionPool(config);
+const pool = new sql.ConnectionPool(config);
 const poolConnect = pool.connect();
 
-module.exports = { sql, pool, poolConnect };*/
+module.exports = {
+  query: async (text, params = {}) => {
+    await poolConnect;
+    const request = pool.request();
+    Object.entries(params).forEach(([key, value]) => {
+      request.input(key, value);
+    });
+    return request.query(text);
+  }
+};

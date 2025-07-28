@@ -33,16 +33,18 @@ body {
   font-weight: bold;
 }
 
-.form-section input {
+.form-section input,
+.form-section select {
   margin-bottom: 15px;
   padding: 10px;
-  border: 1px solid #ccc;
+  border: 1px solid #fff7f7;
+  background-color: #dedcdc;
   border-radius: 4px;
 }
 
 .form-section button {
   padding: 10px;
-  background-color: #45434388;
+  background-color: #221111;
   color: white;
   border: none;
   border-radius: 4px;

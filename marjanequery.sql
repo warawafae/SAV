@@ -30,8 +30,5 @@ VALUES('sami iyad','samiiyad@gmail.com','TV','disponible'),
 ('benfouad omar','benfouadomar@gmail.com','Smartphone','disponible');
 SELECT * FROM marjane_magasin;
 SELECT * FROM marjane_technicien;
-ALTER TABLE marjane_magasin
-ADD mot_de_passe VARCHAR(255);
-UPDATE marjane_magasin 
-SET mot_de_passe ='@saa6'
-WHERE nom_complet_responsable='sali amir';
+
+

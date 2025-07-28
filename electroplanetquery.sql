@@ -31,8 +31,3 @@ VALUES('zahi mohammed','zahimohammed@gmail.com','Ordinateur portable','disponibl
 
 SELECT * FROM electroplanet_magasin;
 SELECT * FROM electroplanet_technicien;
-ALTER TABLE electroplanet_magasin 
-ADD mot_de_passe VARCHAR(255);
-UPDATE electroplanet_magasin 
-SET mot_de_passe ='gk56ia*'
-WHERE nom_complet_responsable='maghi malika';
