@@ -1,35 +1,46 @@
 const express = require("express");
 const bodyParser = require("body-parser");
+const cors = require("cors");
 const path = require("path");
 const dbMarjane = require("./db/dbMarjane");
-const sql = require("mssql"); // Assure-toi que c’est bien installé
 const dbElectroplanet = require("./db/dbElectroplanet");
+const sql = require("mssql");
 
 const app = express();
 const port = process.env.PORT || 5000;
 
+// Middlewares
+app.use(cors());
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use(express.static(path.join(__dirname, "../client")));
-app.set("view engine", "ejs");
-app.set("views", path.join(__dirname, "../client")); // Correct chemin vers Authentification.ejs
+app.use(express.json());
 
-// Page d'accueil
+// Si tu as des fichiers statiques côté backend (ex : images pour EJS), 
+// assure-toi de bien les servir depuis un dossier public (ex: /server/public)
+app.use(express.static(path.join(__dirname, "public"))); 
+
+// Routes API
+app.use("/api/reclamations", require("./routes/reclamation"));
+
+// Setup EJS pour la page d'authentification côté serveur
+app.set("view engine", "ejs");
+app.set("views", path.join(__dirname, "views")); // dossier ./views dans backend
+
+// Page d'accueil avec formulaire EJS
 app.get("/", (req, res) => {
   res.render("Authentification");
 });
 
-// API pour récupérer la liste des magasins selon l'enseigne
+// API : récupérer la liste des magasins selon l’enseigne
 app.get("/api/magasins/:enseigne", async (req, res) => {
-  const enseigne = req.params.enseigne;
-  let db;
-  let table;
+  const enseigne = req.params.enseigne.toLowerCase();
+  let db, table;
 
   if (enseigne === "electroplanet") {
     db = dbElectroplanet;
-    table = "electroplanet_magasin"; // <-- ton vrai nom ici
+    table = "electroplanet_magasin";
   } else if (enseigne === "marjane") {
     db = dbMarjane;
-    table = "marjane_magasin"; // <-- ton vrai nom ici
+    table = "marjane_magasin";
   } else {
     return res.status(400).json({ magasins: [] });
   }
@@ -44,15 +55,16 @@ app.get("/api/magasins/:enseigne", async (req, res) => {
   }
 });
 
+// Login : redirection vers frontend React (port 3000)
 app.post("/login", async (req, res) => {
   const { enseigne, magasin, nom_responsable, password, email } = req.body;
 
-  if (nom_responsable === "" && password === "") {
+  // Cas admin
+  if (!nom_responsable && !password) {
     return res.render("admin", { nom: "Administrateur" });
   }
 
-  let db;
-  let table;
+  let db, table;
 
   if (enseigne === "electroplanet") {
     db = dbElectroplanet;
@@ -73,71 +85,25 @@ app.post("/login", async (req, res) => {
       {
         magasin,
         password,
-        nom_responsable
+        nom_responsable,
       }
     );
 
     if (result.recordset.length > 0) {
       const user = result.recordset[0];
-      return res.render("responsable", { nom: user.nom_complet_responsable });
+      // Redirige vers React frontend (port 3000) avec query param
+      return res.redirect(
+        `http://localhost:3000/responsable?nom=${encodeURIComponent(user.nom_complet_responsable)}`
+      );
     } else {
       res.send("Informations de connexion incorrectes.");
     }
-
   } catch (err) {
     console.error("Erreur de login :", err);
     res.status(500).send("Erreur serveur : " + err.message);
   }
 });
 
-
-/* Traitement du formulaire de connexion
-app.post("/login", async (req, res) => {
-  const { enseigne, magasin, nom_responsable, password } = req.body;
-  let db;
-  let table;
-
-  if (enseigne === "electroplanet") {
-    db = dbElectroplanet;
-    table = "electroplanet_magasin";
-  } else if (enseigne === "marjane") {
-    db = dbMarjane;
-    table = "marjane_magasin";
-  } else {
-    return res.send("Enseigne invalide.");
-  }
-
-  try {
-    const request = db.request();
-    request.input("magasin", sql.VarChar, magasin);
-    request.input("password", sql.VarChar, password);
-    request.input("nom_responsable", sql.VarChar, nom_responsable);
-
-    const result = await request.query(`
-      SELECT * FROM ${table} 
-      WHERE nom_magasin = @magasin 
-        AND mot_de_passe = @password
-        AND nom_complet_responsable = @nom_responsable
-    `);
-
-    if (result.recordset.length > 0) {
-      const user = result.recordset[0];
-      req.session.user = {
-        nom: user.nom_complet_responsable,
-        magasin: user.nom_magasin,
-        enseigne: enseigne,
-      };
-      res.redirect("/reclamation");
-    } else {
-      res.send("Informations de connexion incorrectes.");
-    }
-  } catch (err) {
-    console.error("Erreur de login :", err);
-    res.send("Erreur serveur.");
-  }
-});*/
-
-
 app.listen(port, () => {
-  console.log(`Serveur en cours sur http://localhost:${port}`);
+  console.log(`Serveur backend en cours sur http://localhost:${port}`);
 });

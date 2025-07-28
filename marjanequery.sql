@@ -30,5 +30,23 @@ VALUES('sami iyad','samiiyad@gmail.com','TV','disponible'),
 ('benfouad omar','benfouadomar@gmail.com','Smartphone','disponible');
 SELECT * FROM marjane_magasin;
 SELECT * FROM marjane_technicien;
-
-
+CREATE TABLE marjane_reclamations(
+    id INT IDENTITY(1,1) PRIMARY KEY,
+    nom_client NVARCHAR(100),
+    numero_telephone NVARCHAR(20),
+    libelle NVARCHAR(255),
+    contrat NVARCHAR(100),
+    nom_responsable NVARCHAR(100),
+    nom_magasin NVARCHAR(100),
+    enseigne NVARCHAR(50),
+    spécialité_technicien NVARCHAR(100),
+    nom_technicien NVARCHAR(100),
+    email_technicien NVARCHAR(100),
+    date_reclamation DATETIME DEFAULT GETDATE()
+);
+SELECT * FROM marjane_reclamations;
+ALTER TABLE marjane_reclamations
+ADD 
+    duree_vie NVARCHAR(50), 
+    statut_reclamation NVARCHAR(50) DEFAULT 'ouverte', 
+    motif NVARCHAR(500);  
