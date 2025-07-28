@@ -1,7 +1,6 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const path = require("path");
-const dbElecto = require("./db/dbElectroplanet");
 const dbMarjane = require("./db/dbMarjane");
 const sql = require("mssql"); // Assure-toi que c’est bien installé
 const dbElectroplanet = require("./db/dbElectroplanet");
@@ -26,7 +25,7 @@ app.get("/api/magasins/:enseigne", async (req, res) => {
   let table;
 
   if (enseigne === "electroplanet") {
-    db = dbElecto;
+    db = dbElectroplanet;
     table = "electroplanet_magasin"; // <-- ton vrai nom ici
   } else if (enseigne === "marjane") {
     db = dbMarjane;
@@ -48,8 +47,7 @@ app.get("/api/magasins/:enseigne", async (req, res) => {
 app.post("/login", async (req, res) => {
   const { enseigne, magasin, nom_responsable, password, email } = req.body;
 
-  // Cas spécial ADMIN
-  if (nom_responsable ==="SAVADMNISTRATEUR" && password === "wb@#r") {
+  if (nom_responsable === "" && password === "") {
     return res.render("admin", { nom: "Administrateur" });
   }
 
@@ -67,19 +65,17 @@ app.post("/login", async (req, res) => {
   }
 
   try {
-    const request = db.request();
-    request.input("magasin", sql.VarChar, magasin);
-    request.input("password", sql.VarChar, password);
-    request.input("nom_responsable", sql.VarChar, nom_responsable);
-    request.input("email", sql.VarChar, email);
-
-    const result = await request.query(`
-      SELECT * FROM ${table} 
-      WHERE nom_magasin = @magasin 
-        AND mot_de_passe = @password
-        AND nom_complet_responsable = @nom_responsable
-        AND email_responsable = @email
-    `);
+    const result = await db.query(
+      `SELECT * FROM ${table} 
+       WHERE nom_magasin = @magasin 
+         AND mot_de_passe = @password 
+         AND nom_complet_responsable = @nom_responsable`,
+      {
+        magasin,
+        password,
+        nom_responsable
+      }
+    );
 
     if (result.recordset.length > 0) {
       const user = result.recordset[0];
@@ -87,11 +83,13 @@ app.post("/login", async (req, res) => {
     } else {
       res.send("Informations de connexion incorrectes.");
     }
+
   } catch (err) {
     console.error("Erreur de login :", err);
-    res.send("Erreur serveur.");
+    res.status(500).send("Erreur serveur : " + err.message);
   }
 });
+
 
 /* Traitement du formulaire de connexion
 app.post("/login", async (req, res) => {
