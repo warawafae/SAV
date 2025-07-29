@@ -14,16 +14,15 @@ app.use(cors());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.json());
 
-// Si tu as des fichiers statiques côté backend (ex : images pour EJS), 
-// assure-toi de bien les servir depuis un dossier public (ex: /server/public)
-app.use(express.static(path.join(__dirname, "public"))); 
+// Fichiers statiques côté backend
+app.use(express.static(path.join(__dirname, "public")));
 
 // Routes API
 app.use("/api/reclamations", require("./routes/reclamation"));
 
 // Setup EJS pour la page d'authentification côté serveur
 app.set("view engine", "ejs");
-app.set("views", path.join(__dirname, "views")); // dossier ./views dans backend
+app.set("views", path.join(__dirname, "views"));
 
 // Page d'accueil avec formulaire EJS
 app.get("/", (req, res) => {
@@ -91,9 +90,9 @@ app.post("/login", async (req, res) => {
 
     if (result.recordset.length > 0) {
       const user = result.recordset[0];
-      // Redirige vers React frontend (port 3000) avec query param
+      // Redirige vers React frontend (port 3000) avec query params enseigne et nomMagasin
       return res.redirect(
-        `http://localhost:3000/responsable?nom=${encodeURIComponent(user.nom_complet_responsable)}`
+        `http://localhost:3000/responsable?enseigne=${encodeURIComponent(enseigne)}&nomMagasin=${encodeURIComponent(magasin)}&nomResponsable=${encodeURIComponent(user.nom_complet_responsable)}`
       );
     } else {
       res.send("Informations de connexion incorrectes.");

@@ -1,88 +1,74 @@
-// backend/routes/reclamation.js
 const express = require("express");
 const router = express.Router();
-const sql = require("mssql");
-const dbElectroplanet = require("../db/dbElectroplanet");
 const dbMarjane = require("../db/dbMarjane");
+const dbElectroplanet = require("../db/dbElectroplanet");
 
-router.post("/add", async (req, res) => {
+router.post("/api/reclamation/:enseigne", async (req, res) => {
+  const { enseigne } = req.params;
   const {
-    nom_client,
-    numero_telephone,
+    produit,
+    type,
+    description,
     libelle,
-    contrat,
-    nom_responsable,
+    nom_client,
     nom_magasin,
-    enseigne,
-    specialite
+    nom_responsable,
+    contrat,
+    nom_technicien,
+    email_technicien,
+    spécialité_technicien,
+    numero_telephone,
+    duree_vie,
+    statut_reclamation = "ouverte",
+    motif
   } = req.body;
 
-  let db = enseigne === "electroplanet" ? dbElectroplanet : dbMarjane;
+  const db = enseigne === "marjane" ? dbMarjane :
+             enseigne === "electroplanet" ? dbElectroplanet :
+             null;
 
-  try {
-    // Trouver le technicien disponible avec la spécialité
-    const techResult = await db.query(
-      `SELECT TOP 1 nom_complet_technicien, email_technicien 
-       FROM ${enseigne}_technicien 
-       WHERE spécialité = @specialite AND statut = 'Disponible'`,
-      { specialite }
-    );
+  const table = enseigne === "marjane" ? "marjane_reclamations" :
+                enseigne === "electroplanet" ? "electroplanet_reclamations" :
+                null;
 
-    if (techResult.recordset.length === 0) {
-      return res.status(404).json({ error: "Aucun technicien disponible." });
-    }
-
-    const tech = techResult.recordset[0];
-
-    await db.query(`
-      INSERT INTO reclamations_enseign 
-        (nom_client, numero_telephone, libelle, contrat, nom_responsable, nom_magasin, enseigne, nom_technicien, email_technicien, specialite, statut_reclamation, motif)
-      VALUES 
-        (@nom_client, @numero_telephone, @libelle, @contrat, @nom_responsable, @nom_magasin, @enseigne, @nom_technicien, @email_technicien, @specialite, 'En attente', @motif)
-    `, {
-      nom_client,
-      numero_telephone,
-      libelle,
-      contrat,
-      nom_responsable,
-      nom_magasin,
-      enseigne,
-      nom_technicien: tech.nom_complet_technicien,
-      email_technicien: tech.email_technicien,
-      specialite,
-      motif: libelle
-    });
-
-    res.json({ message: "Réclamation créée avec succès." });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Erreur serveur." });
-  }
-});
-router.get("/:enseigne", async (req, res) => {
-  const enseigne = req.params.enseigne.toLowerCase();
-  let db, table;
-
-  if (enseigne === "electroplanet") {
-    db = dbElectroplanet;
-    table = "electroplanet_reclamations";
-  } else if (enseigne === "marjane") {
-    db = dbMarjane;
-    table = "marjane_reclamations";
-  } else {
+  if (!db || !table) {
     return res.status(400).json({ error: "Enseigne invalide" });
   }
 
   try {
-    const result = await db.query(`
-      SELECT * FROM ${table} 
-      ORDER BY date_reclamation DESC
-    `);
+    await db.request()
+      .input("nom_client", nom_client)
+      .input("numero_telephone", numero_telephone)
+      .input("libelle", libelle)
+      .input("contrat", contrat)
+      .input("nom_responsable", nom_responsable)
+      .input("nom_magasin", nom_magasin)
+      .input("enseigne", enseigne)
+      .input("spécialité_technicien", spécialité_technicien)
+      .input("nom_technicien", nom_technicien)
+      .input("email_technicien", email_technicien)
+      .input("duree_vie", duree_vie || null)
+      .input("statut_reclamation", statut_reclamation)
+      .input("motif", description|| null)
+      .query(`
+        INSERT INTO ${table} (
+          nom_client, numero_telephone, libelle, contrat,
+          nom_responsable, nom_magasin, enseigne,
+          spécialité_technicien, nom_technicien, email_technicien,
+          duree_vie, statut_reclamation, motif
+        ) VALUES (
+          @nom_client, @numero_telephone, @libelle, @contrat,
+          @nom_responsable, @nom_magasin, @enseigne,
+          @spécialité_technicien, @nom_technicien, @email_technicien,
+          @duree_vie, @statut_reclamation, @motif
+        );
+      `);
 
-    res.json(result.recordset);
-  } catch (err) {
-    console.error("Erreur récupération réclamations :", err);
+    res.status(201).json({ message: "Réclamation ajoutée avec succès." });
+  } catch (error) {
+    console.error("Erreur insertion:", error);
     res.status(500).json({ error: "Erreur serveur" });
   }
 });
+
 module.exports = router;
