@@ -50,3 +50,7 @@ ADD
     duree_vie NVARCHAR(50), 
     statut_reclamation NVARCHAR(50) DEFAULT 'ouverte', 
     motif NVARCHAR(500);  
+
+SELECT nom_complet_technicien, email_technicien 
+FROM marjane_technicien 
+WHERE spécialité = 'TV' AND statut = 'disponible';

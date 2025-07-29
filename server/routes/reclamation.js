@@ -1,73 +1,71 @@
 const express = require("express");
 const router = express.Router();
+const sql = require("mssql");
 const dbMarjane = require("../db/dbMarjane");
 const dbElectroplanet = require("../db/dbElectroplanet");
 
-router.post("/api/reclamation/:enseigne", async (req, res) => {
+// POST /api/reclamations/:enseigne
+router.post("/:enseigne", async (req, res) => {
   const { enseigne } = req.params;
   const {
-    produit,
-    type,
-    description,
     libelle,
-    nom_client,
-    nom_magasin,
-    nom_responsable,
+    nomClient,
+    telephoneClient,
+    nomMagasin,
     contrat,
-    nom_technicien,
-    email_technicien,
-    spécialité_technicien,
-    numero_telephone,
-    duree_vie,
-    statut_reclamation = "ouverte",
-    motif
+    technicien,
+    emailTechnicien,
+    specialite,
+    motif,
   } = req.body;
 
-  const db = enseigne === "marjane" ? dbMarjane :
-             enseigne === "electroplanet" ? dbElectroplanet :
-             null;
+  const db =
+    enseigne === "marjane"
+      ? dbMarjane
+      : enseigne === "electroplanet"
+      ? dbElectroplanet
+      : null;
 
-  const table = enseigne === "marjane" ? "marjane_reclamations" :
-                enseigne === "electroplanet" ? "electroplanet_reclamations" :
-                null;
+  const table =
+    enseigne === "marjane"
+      ? "marjane_reclamations"
+      : enseigne === "electroplanet"
+      ? "electroplanet_reclamations"
+      : null;
 
   if (!db || !table) {
     return res.status(400).json({ error: "Enseigne invalide" });
   }
 
   try {
-    await db.request()
-      .input("nom_client", nom_client)
-      .input("numero_telephone", numero_telephone)
-      .input("libelle", libelle)
-      .input("contrat", contrat)
-      .input("nom_responsable", nom_responsable)
-      .input("nom_magasin", nom_magasin)
-      .input("enseigne", enseigne)
-      .input("spécialité_technicien", spécialité_technicien)
-      .input("nom_technicien", nom_technicien)
-      .input("email_technicien", email_technicien)
-      .input("duree_vie", duree_vie || null)
-      .input("statut_reclamation", statut_reclamation)
-      .input("motif", description|| null)
-      .query(`
-        INSERT INTO ${table} (
-          nom_client, numero_telephone, libelle, contrat,
-          nom_responsable, nom_magasin, enseigne,
-          spécialité_technicien, nom_technicien, email_technicien,
-          duree_vie, statut_reclamation, motif
+    await db
+      .request()
+      .input("libelle", sql.NVarChar, libelle)
+      .input("nom_client", sql.NVarChar, nomClient)
+      .input("numero_telephone", sql.NVarChar, telephoneClient)
+      .input("nom_magasin", sql.NVarChar, nomMagasin)
+      .input("contrat", sql.NVarChar, contrat)
+      .input("nom_technicien", sql.NVarChar, technicien)
+      .input("email_technicien", sql.NVarChar, emailTechnicien)
+      .input("specialite_technicien", sql.NVarChar, specialite)
+      .input("motif", sql.NVarChar, motif)
+      .input("statut_reclamation", sql.NVarChar, "ouverte")
+      .query(
+        `INSERT INTO ${table} (
+          libelle, nom_client, numero_telephone, nom_magasin,
+          contrat, nom_technicien, email_technicien,
+          specialite_technicien, motif, statut_reclamation
         ) VALUES (
-          @nom_client, @numero_telephone, @libelle, @contrat,
-          @nom_responsable, @nom_magasin, @enseigne,
-          @spécialité_technicien, @nom_technicien, @email_technicien,
-          @duree_vie, @statut_reclamation, @motif
-        );
-      `);
+          @libelle, @nom_client, @numero_telephone, @nom_magasin,
+          @contrat, @nom_technicien, @email_technicien,
+          @specialite_technicien, @motif, @statut_reclamation
+        )`
+      );
 
     res.status(201).json({ message: "Réclamation ajoutée avec succès." });
   } catch (error) {
-    console.error("Erreur insertion:", error);
-    res.status(500).json({ error: "Erreur serveur" });
+    console.error("Erreur insertion réclamation:", error);
+    res.status(500).json({ error: error.message });
   }
 });
 
