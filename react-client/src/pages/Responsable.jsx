@@ -1,34 +1,21 @@
-import React, { useEffect, useState } from "react";
-import { useSearchParams, useNavigate, useLocation } from "react-router-dom";
+import React, { useEffect } from "react";
+import { useSearchParams, useNavigate } from "react-router-dom";
 import HistoriqueTable from "./HistoriqueReclamation";
 
 function ResponsablePage() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const location = useLocation();
 
   const enseigne = searchParams.get("enseigne");
-  const nomResponsable = searchParams.get("nom");
+  const nomMagasin = searchParams.get("nomMagasin");
+  const nomResponsable = searchParams.get("nomResponsable");
 
-  const [reclamations, setReclamations] = useState([]);
-
+  // Stocker dans localStorage pour usage global si besoin
   useEffect(() => {
-    const enseigne = searchParams.get("enseigne");
-    const nomMagasin = searchParams.get("nomMagasin");
-    const nomResponsable = searchParams.get("nomResponsable");
-
     if (enseigne && nomMagasin && nomResponsable) {
       localStorage.setItem("user", JSON.stringify({ enseigne, nomMagasin, nomResponsable }));
     }
-  }, [searchParams]);
-
-  // Si nouvelle réclamation vient de la page formulaire
-  useEffect(() => {
-    const newRec = location.state?.newRec;
-    if (newRec) {
-      setReclamations(prev => [...prev, newRec]);
-    }
-  }, [location.state]);
+  }, [enseigne, nomMagasin, nomResponsable]);
 
   const handleGoToForm = () => {
     navigate("/creer-reclamation", {
@@ -37,12 +24,14 @@ function ResponsablePage() {
   };
 
   return (
-    <div>
+    <div style={{ padding: "20px" }}>
       <h2>Bienvenue {nomResponsable}</h2>
-      <button onClick={handleGoToForm}>Créer une réclamation</button>
+      <button onClick={handleGoToForm} style={{ marginBottom: "20px" }}>
+        Créer une réclamation
+      </button>
 
-      <h3>Historique de réclamation</h3>
-      <HistoriqueTable data={reclamations} />
+      <h3>Historique des réclamations</h3>
+      <HistoriqueTable enseigne={enseigne} />
     </div>
   );
 }

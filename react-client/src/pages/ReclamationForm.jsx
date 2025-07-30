@@ -81,18 +81,19 @@ function ReclamationForm({ onSuccess }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const bodyToSend = {
-      nom_client: form.nomClient,
-      numero_telephone: form.telephoneClient,
-      libelle: form.libelle,
-      contrat: form.contrat,
-      nom_responsable: "",
-      nom_magasin: form.nomMagasin,
-      enseigne: form.enseigne,
-      specialite_technicien: specialite,
-      nom_technicien: technicien,
-      email_technicien: form.emailTechnicien,
-      motif: form.motif,
-    };
+  nom_client: form.nomClient,
+  numero_telephone: form.telephoneClient,
+  libelle: form.libelle,
+  contrat: form.contrat,
+  nom_responsable: JSON.parse(localStorage.getItem("user"))?.nomResponsable || "", 
+  nom_magasin: form.nomMagasin,
+  enseigne: form.enseigne,
+  specialite_technicien: specialite,
+  nom_technicien: technicien,
+  email_technicien: form.emailTechnicien,
+  motif: form.motif,
+};
+
 
     try {
       const res = await fetch(`/api/reclamations/${form.enseigne}`, {

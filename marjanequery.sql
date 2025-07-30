@@ -55,4 +55,4 @@ FROM marjane_technicien
 WHERE spécialité = 'TV' AND statut = 'disponible';
 SELECT * FROM marjane_reclamations;
 SELECT * FROM electroplanet_reclamations;
-DELETE FROM marjane_reclamations WHERE id = 1;
+DELETE FROM marjane_reclamations WHERE id = 7;

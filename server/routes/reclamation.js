@@ -5,7 +5,7 @@ const dbMarjane = require("../db/dbMarjane");
 const dbElectroplanet = require("../db/dbElectroplanet");
 
 router.post("/:enseigne", async (req, res) => {
-   console.log("BODY RECU:", req.body); 
+   console.log("Requête reçue :", req.body);
   const enseigneParam = req.params.enseigne.toLowerCase();
 
   let db;
@@ -24,31 +24,24 @@ router.post("/:enseigne", async (req, res) => {
   try {
     await db.poolConnect;
     const request = db.pool.request();
-
-   const {
-  nomClient,
-  telephoneClient,
+  const {
+  nom_client,
+  numero_telephone,
   libelle,
   contrat,
-  nomMagasin,
+  nom_responsable = "Responsable Nom", // si non envoyé depuis le frontend
+  nom_magasin,
   enseigne,
   specialite_technicien,
   nom_technicien,
-  emailTechnicien,
+  email_technicien,
   motif,
 } = req.body;
-
-const nom_client = nomClient;
-const numero_telephone = telephoneClient;
-const nom_magasin = nomMagasin;
-const email_technicien = emailTechnicien;
-
-// Si tu veux générer nom_responsable depuis l'utilisateur connecté :
-const nom_responsable = "Responsable Nom"; // à remplacer par localStorage côté frontend si dispo
+// à remplacer par localStorage côté frontend si dispo
 
 
     // Ajout des paramètres
-    request.input("nom_client", sql.NVarChar(100), nom_client);
+request.input("nom_client", sql.NVarChar(100), nom_client);
 request.input("numero_telephone", sql.NVarChar(20), numero_telephone);
 request.input("libelle", sql.NVarChar(255), libelle);
 request.input("contrat", sql.NVarChar(100), contrat);
@@ -76,6 +69,7 @@ VALUES
     res.status(500).json({ message: "Erreur serveur lors de l'insertion" });
   }
 });
+
 router.get("/:enseigne", async (req, res) => {
   const enseigneParam = req.params.enseigne.toLowerCase();
 
