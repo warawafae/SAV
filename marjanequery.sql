@@ -44,7 +44,6 @@ CREATE TABLE marjane_reclamations(
     email_technicien NVARCHAR(100),
     date_reclamation DATETIME DEFAULT GETDATE()
 );
-SELECT * FROM marjane_reclamations;
 ALTER TABLE marjane_reclamations
 ADD 
     duree_vie NVARCHAR(50), 
@@ -54,3 +53,6 @@ ADD
 SELECT nom_complet_technicien, email_technicien 
 FROM marjane_technicien 
 WHERE spécialité = 'TV' AND statut = 'disponible';
+SELECT * FROM marjane_reclamations;
+SELECT * FROM electroplanet_reclamations;
+DELETE FROM marjane_reclamations WHERE id = 1;

@@ -14,7 +14,6 @@ function ReclamationPage() {
 
   return (
     <div>
-      <h2>Créer une réclamation</h2>
       <ReclamationForm enseigne={enseigne} onSuccess={handleSuccess} />
     </div>
   );

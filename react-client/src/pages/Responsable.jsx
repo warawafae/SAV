@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useSearchParams, useNavigate, useLocation } from "react-router-dom";
-import HistoriqueTable from "./HistoriqueTable";
+import HistoriqueTable from "./HistoriqueReclamation";
 
 function ResponsablePage() {
   const [searchParams] = useSearchParams();

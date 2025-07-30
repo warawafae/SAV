@@ -4,68 +4,111 @@ const sql = require("mssql");
 const dbMarjane = require("../db/dbMarjane");
 const dbElectroplanet = require("../db/dbElectroplanet");
 
-// POST /api/reclamations/:enseigne
 router.post("/:enseigne", async (req, res) => {
-  const { enseigne } = req.params;
-  const {
-    libelle,
-    nomClient,
-    telephoneClient,
-    nomMagasin,
-    contrat,
-    technicien,
-    emailTechnicien,
-    specialite,
-    motif,
-  } = req.body;
+   console.log("BODY RECU:", req.body); 
+  const enseigneParam = req.params.enseigne.toLowerCase();
 
-  const db =
-    enseigne === "marjane"
-      ? dbMarjane
-      : enseigne === "electroplanet"
-      ? dbElectroplanet
-      : null;
+  let db;
+  let table;
 
-  const table =
-    enseigne === "marjane"
-      ? "marjane_reclamations"
-      : enseigne === "electroplanet"
-      ? "electroplanet_reclamations"
-      : null;
-
-  if (!db || !table) {
-    return res.status(400).json({ error: "Enseigne invalide" });
+  if (enseigneParam === "marjane") {
+    db = dbMarjane;
+    table = "marjane_reclamations";
+  } else if (enseigneParam === "electroplanet") {
+    db = dbElectroplanet;
+    table = "electroplanet_reclamations";
+  } else {
+    return res.status(400).json({ message: "Enseigne invalide" });
   }
 
   try {
-    await db
-      .request()
-      .input("libelle", sql.NVarChar, libelle)
-      .input("nom_client", sql.NVarChar, nomClient)
-      .input("numero_telephone", sql.NVarChar, telephoneClient)
-      .input("nom_magasin", sql.NVarChar, nomMagasin)
-      .input("contrat", sql.NVarChar, contrat)
-      .input("nom_technicien", sql.NVarChar, technicien)
-      .input("email_technicien", sql.NVarChar, emailTechnicien)
-      .input("specialite_technicien", sql.NVarChar, specialite)
-      .input("motif", sql.NVarChar, motif)
-      .input("statut_reclamation", sql.NVarChar, "ouverte")
-      .query(
-        `INSERT INTO ${table} (
-          libelle, nom_client, numero_telephone, nom_magasin,
-          contrat, nom_technicien, email_technicien,
-          specialite_technicien, motif, statut_reclamation
-        ) VALUES (
-          @libelle, @nom_client, @numero_telephone, @nom_magasin,
-          @contrat, @nom_technicien, @email_technicien,
-          @specialite_technicien, @motif, @statut_reclamation
-        )`
-      );
+    await db.poolConnect;
+    const request = db.pool.request();
 
-    res.status(201).json({ message: "Réclamation ajoutée avec succès." });
+   const {
+  nomClient,
+  telephoneClient,
+  libelle,
+  contrat,
+  nomMagasin,
+  enseigne,
+  specialite_technicien,
+  nom_technicien,
+  emailTechnicien,
+  motif,
+} = req.body;
+
+const nom_client = nomClient;
+const numero_telephone = telephoneClient;
+const nom_magasin = nomMagasin;
+const email_technicien = emailTechnicien;
+
+// Si tu veux générer nom_responsable depuis l'utilisateur connecté :
+const nom_responsable = "Responsable Nom"; // à remplacer par localStorage côté frontend si dispo
+
+
+    // Ajout des paramètres
+    request.input("nom_client", sql.NVarChar(100), nom_client);
+request.input("numero_telephone", sql.NVarChar(20), numero_telephone);
+request.input("libelle", sql.NVarChar(255), libelle);
+request.input("contrat", sql.NVarChar(100), contrat);
+request.input("nom_responsable", sql.NVarChar(100), nom_responsable);
+request.input("nom_magasin", sql.NVarChar(100), nom_magasin);
+request.input("enseigne", sql.NVarChar(50), enseigne);
+request.input("specialite_technicien", sql.NVarChar(100), specialite_technicien);
+request.input("nom_technicien", sql.NVarChar(100), nom_technicien);
+request.input("email_technicien", sql.NVarChar(100), email_technicien);
+request.input("motif", sql.NVarChar(255), motif);
+
+
+    const query = `
+      INSERT INTO ${table} 
+(nom_client, numero_telephone, libelle, contrat, nom_responsable, nom_magasin, enseigne, specialite_technicien, nom_technicien, email_technicien, motif)
+VALUES 
+(@nom_client, @numero_telephone, @libelle, @contrat, @nom_responsable, @nom_magasin, @enseigne, @specialite_technicien, @nom_technicien, @email_technicien, @motif)
+    `;
+
+    await request.query(query);
+
+    res.status(201).json({ message: "Réclamation enregistrée avec succès" });
   } catch (error) {
-    console.error("Erreur insertion réclamation:", error);
-    res.status(500).json({ error: error.message });
+    console.error("Erreur lors de l'insertion :", error);
+    res.status(500).json({ message: "Erreur serveur lors de l'insertion" });
+  }
+});
+router.get("/:enseigne", async (req, res) => {
+  const enseigneParam = req.params.enseigne.toLowerCase();
+
+  let db;
+  let table;
+
+  if (enseigneParam === "marjane") {
+    db = dbMarjane;
+    table = "marjane_reclamations";
+  } else if (enseigneParam === "electroplanet") {
+    db = dbElectroplanet;
+    table = "electroplanet_reclamations";
+  } else {
+    return res.status(400).json({ message: "Enseigne invalide" });
+  }
+
+  try {
+    await db.poolConnect;
+    const request = db.pool.request();
+
+    // Récupérer les colonnes demandées
+    const query = `
+      SELECT nom_client, date_reclamation, nom_technicien, duree_vie, libelle 
+      FROM ${table}
+      ORDER BY date_reclamation DESC
+    `;
+
+    const result = await request.query(query);
+
+    res.json(result.recordset);
+  } catch (error) {
+    console.error("Erreur lors de la récupération :", error);
+    res.status(500).json({ message: "Erreur serveur lors de la récupération" });
   }
 });
 

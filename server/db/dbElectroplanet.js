@@ -10,10 +10,13 @@ const config = {
     trustServerCertificate: true
   }
 };
+
 const pool = new sql.ConnectionPool(config);
 const poolConnect = pool.connect();
 
 module.exports = {
+  pool, // ✅ Ajouté
+  poolConnect, // ✅ Ajouté
   query: async (text, params = {}) => {
     await poolConnect;
     const request = pool.request();
@@ -21,5 +24,5 @@ module.exports = {
       request.input(key, value);
     });
     return request.query(text);
-  }
+  },
 };

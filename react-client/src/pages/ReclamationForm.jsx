@@ -1,3 +1,4 @@
+import './ReclamationForm.css';
 import React, { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import axios from "axios";
@@ -23,7 +24,6 @@ function ReclamationForm({ onSuccess }) {
     motif: "",
   });
 
-  // Remplit enseigne et magasin depuis localStorage si dispo
   useEffect(() => {
     const user = JSON.parse(localStorage.getItem("user"));
     if (user) {
@@ -35,36 +35,26 @@ function ReclamationForm({ onSuccess }) {
     }
   }, [enseigneParam, nomMagasinParam]);
 
-  // Charge les spécialités selon l'enseigne
   useEffect(() => {
     if (form.enseigne) {
       axios
         .get(`/api/techniciens/specialites?enseigne=${form.enseigne}`)
         .then((res) => {
-  // res.data est un tableau simple de chaînes, pas d'objets
-  // const specs = res.data.map((s) => s.spécialité); <-- à corriger
-  const specs = res.data;  // directement res.data, c'est déjà un tableau de strings
-  setSpecialites(specs);
-  setSpecialite("");
-  setTechniciens([]);
-  setTechnicien("");
-})
-
+          setSpecialites(res.data);
+          setSpecialite("");
+          setTechniciens([]);
+          setTechnicien("");
+        })
         .catch((err) => console.error("Erreur chargement spécialités:", err));
     }
   }, [form.enseigne]);
 
-  // Charge les techniciens disponibles selon spécialité et enseigne
   useEffect(() => {
     if (specialite && form.enseigne) {
       axios
-        .get(
-          `/api/techniciens/techniciens?enseigne=${form.enseigne}&specialite=${encodeURIComponent(
-            specialite
-          )}`
-        )
+        .get(`/api/techniciens/techniciens?enseigne=${form.enseigne}&specialite=${encodeURIComponent(specialite)}`)
         .then((res) => {
-          setTechniciens(res.data); // ex: [{nom_complet_technicien, email_technicien}, ...]
+          setTechniciens(res.data);
           setTechnicien("");
         })
         .catch((err) => console.error("Erreur chargement techniciens:", err));
@@ -74,22 +64,14 @@ function ReclamationForm({ onSuccess }) {
     }
   }, [specialite, form.enseigne]);
 
-  // Met à jour email technicien quand sélection change
   useEffect(() => {
     const selectedTech = techniciens.find(
       (tech) => tech.nom_complet_technicien === technicien
     );
-    if (selectedTech) {
-      setForm((prev) => ({
-        ...prev,
-        emailTechnicien: selectedTech.email_technicien || "",
-      }));
-    } else {
-      setForm((prev) => ({
-        ...prev,
-        emailTechnicien: "",
-      }));
-    }
+    setForm((prev) => ({
+      ...prev,
+      emailTechnicien: selectedTech ? selectedTech.email_technicien : "",
+    }));
   }, [technicien, techniciens]);
 
   const handleChange = (e) => {
@@ -98,12 +80,21 @@ function ReclamationForm({ onSuccess }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const bodyToSend = {
+      nom_client: form.nomClient,
+      numero_telephone: form.telephoneClient,
+      libelle: form.libelle,
+      contrat: form.contrat,
+      nom_responsable: "",
+      nom_magasin: form.nomMagasin,
+      enseigne: form.enseigne,
+      specialite_technicien: specialite,
+      nom_technicien: technicien,
+      email_technicien: form.emailTechnicien,
+      motif: form.motif,
+    };
+
     try {
-      const bodyToSend = {
-        ...form,
-        spécialité_technicien: specialite,
-        nom_technicien: technicien,
-      };
       const res = await fetch(`/api/reclamations/${form.enseigne}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -117,119 +108,70 @@ function ReclamationForm({ onSuccess }) {
   };
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      style={{ maxWidth: 500, display: "grid", gap: 15 }}
-    >
-      <label htmlFor="libelle">Libellé</label>
-      <input
-        id="libelle"
-        name="libelle"
-        placeholder="Libellé"
-        value={form.libelle}
-        onChange={handleChange}
-        required
-      />
+    <div className="form-container">
+      <div className="logo-container">
+        {form.enseigne === 'marjane' && (
+          <img src="/images/Marjane-logo.png" alt="Marjane" className="logo" />
+        )}
+        {form.enseigne === 'electroplanet' && (
+          <img src="/images/Nouveau_logo_electroplanet.png" alt="Electroplanet" className="logo zoom-electro" />
+        )}
+      </div>
 
-      <label htmlFor="nomClient">Nom client</label>
-      <input
-        id="nomClient"
-        name="nomClient"
-        placeholder="Nom client"
-        value={form.nomClient}
-        onChange={handleChange}
-        required
-      />
+      <form onSubmit={handleSubmit} className="reclamation-form">
+        <div className="form-row">
+          <div className="form-col">
+            <label htmlFor="nomClient">Nom client</label>
+            <input id="nomClient" name="nomClient" value={form.nomClient} onChange={handleChange} required />
 
-      <label htmlFor="nomMagasin">Nom du magasin</label>
-      <input
-        id="nomMagasin"
-        name="nomMagasin"
-        value={form.nomMagasin}
-        disabled
-        style={{ backgroundColor: "#f0f0f0" }}
-      />
+            <label htmlFor="telephoneClient">Téléphone client</label>
+            <input id="telephoneClient" name="telephoneClient" value={form.telephoneClient} onChange={handleChange} required />
 
-      <label htmlFor="enseigne">Enseigne</label>
-      <input
-        id="enseigne"
-        name="enseigne"
-        value={form.enseigne}
-        disabled
-        style={{ backgroundColor: "#f0f0f0" }}
-      />
+            <label htmlFor="nomMagasin">Nom du magasin</label>
+            <input id="nomMagasin" name="nomMagasin" value={form.nomMagasin} disabled />
 
-      <label htmlFor="contrat">Contrat</label>
-      <input
-        id="contrat"
-        name="contrat"
-        placeholder="Contrat"
-        value={form.contrat}
-        onChange={handleChange}
-      />
+            <label htmlFor="enseigne">Enseigne</label>
+            <input id="enseigne" name="enseigne" value={form.enseigne} disabled />
+          </div>
 
-      <label htmlFor="specialite">Spécialité</label>
-      <select
-        id="specialite"
-        value={specialite}
-        onChange={(e) => setSpecialite(e.target.value)}
-        required
-      >
-        <option value="">-- Choisir une spécialité --</option>
-        {specialites.map((sp) => (
-          <option key={sp} value={sp}>
-            {sp}
-          </option>
-        ))}
-      </select>
+          <div className="form-col">
+            <label htmlFor="contrat">Contrat</label>
+            <input id="contrat" name="contrat" value={form.contrat} onChange={handleChange} />
 
-      <label htmlFor="technicien">Technicien</label>
-      <select
-        id="technicien"
-        value={technicien}
-        onChange={(e) => setTechnicien(e.target.value)}
-        required
-      >
-        <option value="">-- Choisir un technicien disponible --</option>
-        {techniciens.map((tech) => (
-          <option key={tech.nom_complet_technicien} value={tech.nom_complet_technicien}>
-            {tech.nom_complet_technicien}
-          </option>
-        ))}
-      </select>
+            <label htmlFor="specialite">Spécialité</label>
+            <select id="specialite" value={specialite} onChange={(e) => setSpecialite(e.target.value)} required>
+              <option value="">-- Choisir une spécialité --</option>
+              {specialites.map((sp) => (
+                <option key={sp} value={sp}>{sp}</option>
+              ))}
+            </select>
 
-      <label htmlFor="emailTechnicien">Email technicien</label>
-      <input
-        id="emailTechnicien"
-        name="emailTechnicien"
-        placeholder="Email technicien"
-        value={form.emailTechnicien}
-        disabled
-        style={{ backgroundColor: "#f0f0f0" }}
-      />
+            <label htmlFor="technicien">Technicien</label>
+            <select id="technicien" value={technicien} onChange={(e) => setTechnicien(e.target.value)} required>
+              <option value="">-- Choisir un technicien --</option>
+              {techniciens.map((tech) => (
+                <option key={tech.nom_complet_technicien} value={tech.nom_complet_technicien}>
+                  {tech.nom_complet_technicien}
+                </option>
+              ))}
+            </select>
 
-      <label htmlFor="telephoneClient">Téléphone client</label>
-      <input
-        id="telephoneClient"
-        name="telephoneClient"
-        placeholder="Téléphone client"
-        value={form.telephoneClient}
-        onChange={handleChange}
-        required
-      />
+            <label htmlFor="emailTechnicien">Email technicien</label>
+            <input id="emailTechnicien" name="emailTechnicien" value={form.emailTechnicien} disabled />
+          </div>
+        </div>
 
-      <label htmlFor="motif">Motif</label>
-      <textarea
-        id="motif"
-        name="motif"
-        placeholder="Motif de la réclamation"
-        value={form.motif}
-        onChange={handleChange}
-        required
-      ></textarea>
+        <div className="form-full">
+          <label htmlFor="libelle">Libellé</label>
+          <input id="libelle" name="libelle" value={form.libelle} onChange={handleChange} required />
 
-      <button type="submit">Envoyer</button>
-    </form>
+          <label htmlFor="motif">Motif</label>
+          <textarea id="motif" name="motif" value={form.motif} onChange={handleChange} required />
+
+          <button type="submit">Envoyer</button>
+        </div>
+      </form>
+    </div>
   );
 }
 

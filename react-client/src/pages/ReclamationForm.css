@@ -1,0 +1,122 @@
+.form-container {
+  background-color: #c8c5c590; /* gris clair */
+  padding: 30px;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(119, 109, 109, 0.1);
+
+  /* Ajout pour hauteur pleine page */
+  height: 100vh;       /* hauteur = 100% de la fenêtre */
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start; /* ou center selon besoin */
+  align-items: center;
+}
+
+.logo-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.logo {
+  max-height: 80px;
+}
+
+.reclamation-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 30px;
+  justify-content: space-between;
+}
+
+.form-left,
+.form-right {
+  flex: 1;
+  min-width: 300px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.form-full {
+  width: 100%;
+  margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+input,
+select,
+textarea {
+  padding: 8px;
+  font-size: 14px;
+}
+
+textarea {
+  min-height: 80px;
+}
+
+button {
+  padding: 10px;
+  background-color: #100069;
+  color: rgb(255, 255, 255);
+  border: none;
+  cursor: pointer;
+}
+.logo {
+  height: 80px;
+  transition: transform 0.3s ease;
+}
+
+.zoom-electro {
+  transform: scale(0.9);
+}
+
+.logo-container {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.logo {
+  height: 80px;
+}
+
+.zoom-electro {
+  transform: scale(1.5);
+}
+
+
+.form-row {
+  display: flex;
+  gap: 200px;
+  flex-wrap: wrap;
+}
+
+.form-col {
+  flex: 1;
+  min-width: 300px;
+}
+
+.form-full {
+  margin-top: 20px;
+}
+
+input, select, textarea {
+  width: 100%;
+  padding: 10px;
+  margin-top: 5px;
+  border-radius: 5px;
+  border: 1px solid #877f7f;
+  box-sizing: border-box;
+}
+
+label {
+  font-weight: bold;
+}
+
+button:hover {
+  background-color: #0056b3;
+}
