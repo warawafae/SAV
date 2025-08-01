@@ -4,8 +4,9 @@ const sql = require("mssql");
 const dbMarjane = require("../db/dbMarjane");
 const dbElectroplanet = require("../db/dbElectroplanet");
 
+// POST : Ajouter une réclamation
 router.post("/:enseigne", async (req, res) => {
-   console.log("Requête reçue :", req.body);
+  console.log("Requête reçue :", req.body);
   const enseigneParam = req.params.enseigne.toLowerCase();
 
   let db;
@@ -24,45 +25,41 @@ router.post("/:enseigne", async (req, res) => {
   try {
     await db.poolConnect;
     const request = db.pool.request();
-  const {
-  nom_client,
-  numero_telephone,
-  libelle,
-  contrat,
-  nom_responsable = "Responsable Nom", // si non envoyé depuis le frontend
-  nom_magasin,
-  enseigne,
-  specialite_technicien,
-  nom_technicien,
-  email_technicien,
-  motif,
-} = req.body;
-// à remplacer par localStorage côté frontend si dispo
 
+    const {
+      nom_client,
+      numero_telephone,
+      libelle,
+      contrat,
+      nom_responsable = "Responsable Nom",
+      nom_magasin,
+      enseigne,
+      specialite_technicien,
+      nom_technicien,
+      email_technicien,
+      motif,
+    } = req.body;
 
-    // Ajout des paramètres
-request.input("nom_client", sql.NVarChar(100), nom_client);
-request.input("numero_telephone", sql.NVarChar(20), numero_telephone);
-request.input("libelle", sql.NVarChar(255), libelle);
-request.input("contrat", sql.NVarChar(100), contrat);
-request.input("nom_responsable", sql.NVarChar(100), nom_responsable);
-request.input("nom_magasin", sql.NVarChar(100), nom_magasin);
-request.input("enseigne", sql.NVarChar(50), enseigne);
-request.input("specialite_technicien", sql.NVarChar(100), specialite_technicien);
-request.input("nom_technicien", sql.NVarChar(100), nom_technicien);
-request.input("email_technicien", sql.NVarChar(100), email_technicien);
-request.input("motif", sql.NVarChar(255), motif);
-
+    request.input("nom_client", sql.NVarChar(100), nom_client);
+    request.input("numero_telephone", sql.NVarChar(20), numero_telephone);
+    request.input("libelle", sql.NVarChar(255), libelle);
+    request.input("contrat", sql.NVarChar(100), contrat);
+    request.input("nom_responsable", sql.NVarChar(100), nom_responsable);
+    request.input("nom_magasin", sql.NVarChar(100), nom_magasin);
+    request.input("enseigne", sql.NVarChar(50), enseigne);
+    request.input("specialite_technicien", sql.NVarChar(100), specialite_technicien);
+    request.input("nom_technicien", sql.NVarChar(100), nom_technicien);
+    request.input("email_technicien", sql.NVarChar(100), email_technicien);
+    request.input("motif", sql.NVarChar(255), motif);
 
     const query = `
       INSERT INTO ${table} 
-(nom_client, numero_telephone, libelle, contrat, nom_responsable, nom_magasin, enseigne, specialite_technicien, nom_technicien, email_technicien, motif)
-VALUES 
-(@nom_client, @numero_telephone, @libelle, @contrat, @nom_responsable, @nom_magasin, @enseigne, @specialite_technicien, @nom_technicien, @email_technicien, @motif)
+      (nom_client, numero_telephone, libelle, contrat, nom_responsable, nom_magasin, enseigne, specialite_technicien, nom_technicien, email_technicien, motif)
+      VALUES 
+      (@nom_client, @numero_telephone, @libelle, @contrat, @nom_responsable, @nom_magasin, @enseigne, @specialite_technicien, @nom_technicien, @email_technicien, @motif)
     `;
 
     await request.query(query);
-
     res.status(201).json({ message: "Réclamation enregistrée avec succès" });
   } catch (error) {
     console.error("Erreur lors de l'insertion :", error);
@@ -70,11 +67,16 @@ VALUES
   }
 });
 
+// GET : Historique filtré par nom_magasin
 router.get("/:enseigne", async (req, res) => {
   const enseigneParam = req.params.enseigne.toLowerCase();
+  const nomMagasin = req.headers['x-nom-magasin'];
 
-  let db;
-  let table;
+  if (!nomMagasin) {
+    return res.status(400).json({ message: "Nom du magasin manquant dans les headers" });
+  }
+
+  let db, table;
 
   if (enseigneParam === "marjane") {
     db = dbMarjane;
@@ -89,11 +91,12 @@ router.get("/:enseigne", async (req, res) => {
   try {
     await db.poolConnect;
     const request = db.pool.request();
+    request.input("nom_magasin", sql.NVarChar(100), nomMagasin);
 
-    // Récupérer les colonnes demandées
     const query = `
       SELECT nom_client, date_reclamation, nom_technicien, duree_vie, libelle 
       FROM ${table}
+      WHERE nom_magasin = @nom_magasin
       ORDER BY date_reclamation DESC
     `;
 
@@ -105,5 +108,6 @@ router.get("/:enseigne", async (req, res) => {
     res.status(500).json({ message: "Erreur serveur lors de la récupération" });
   }
 });
+
 
 module.exports = router;

@@ -29,8 +29,6 @@ function ResponsablePage() {
       <button onClick={handleGoToForm} style={{ marginBottom: "20px" }}>
         Créer une réclamation
       </button>
-
-      <h3>Historique des réclamations</h3>
       <HistoriqueTable enseigne={enseigne} />
     </div>
   );

@@ -18,5 +18,4 @@ function ReclamationPage() {
     </div>
   );
 }
-
 export default ReclamationPage;
