@@ -5,11 +5,11 @@ function HistoriqueTable({ enseigne }) {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedRec, setSelectedRec] = useState(null);
+  const [updatedFields, setUpdatedFields] = useState({ duree_vie: '', statut_reclamation: '' });
 
   useEffect(() => {
     if (!enseigne) return;
 
-    // Récupérer le nom du magasin depuis localStorage (par ex. après login)
     const user = JSON.parse(localStorage.getItem('user'));
     const nomMagasin = user?.nomMagasin;
 
@@ -21,20 +21,35 @@ function HistoriqueTable({ enseigne }) {
 
     setLoading(true);
 
-    // On envoie nomMagasin dans les headers pour backend (comme tu fais dans ta route)
     axios.get(`/api/reclamations/${enseigne}`, {
       headers: { 'x-nom-magasin': nomMagasin }
     })
-    .then(res => {
-      setData(res.data);
-      setLoading(false);
-    })
-    .catch(err => {
-      console.error(err);
-      setLoading(false);
-    });
-
+      .then(res => {
+        setData(res.data);
+        setLoading(false);
+      })
+      .catch(err => {
+        console.error(err);
+        setLoading(false);
+      });
   }, [enseigne]);
+
+  const handleEdit = (field, value) => {
+    setUpdatedFields(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handleSave = () => {
+    axios.put(`/api/reclamations/${enseigne}/${selectedRec.id}`, updatedFields)
+      .then(() => {
+        // Mise à jour locale sans tout recharger
+        setData(data.map(rec => rec.id === selectedRec.id ? { ...rec, ...updatedFields } : rec));
+        setSelectedRec(null);
+      })
+      .catch(err => {
+        console.error('Erreur lors de la mise à jour', err);
+        alert("Erreur lors de la mise à jour.");
+      });
+  };
 
   if (loading) return <p>Chargement...</p>;
   if (data.length === 0) return <p>Aucune réclamation trouvée.</p>;
@@ -44,25 +59,31 @@ function HistoriqueTable({ enseigne }) {
       <table>
         <thead>
           <tr>
-            <th>Nom client</th>
             <th>Date réclamation</th>
+            <th>Nom client</th>
+            <th>Libellé</th>
             <th>Nom technicien</th>
             <th>Durée vie</th>
-            <th>Libellé</th>
+            <th>Statut</th>
             <th>Action</th>
           </tr>
         </thead>
         <tbody>
           {data.map((rec, i) => (
             <tr key={i}>
-              <td>{rec.nom_client}</td>
               <td>{new Date(rec.date_reclamation).toLocaleDateString()}</td>
+              <td>{rec.nom_client}</td>
+              <td>{rec.libelle}</td>
               <td>{rec.nom_technicien}</td>
               <td>{rec.duree_vie}</td>
-              <td>{rec.libelle}</td>
-              <td>
-                <button onClick={() => setSelectedRec(rec)}>Consulter</button>
-              </td>
+              <td>{rec.statut_reclamation}</td>
+              <td><button onClick={() => {
+                setSelectedRec(rec);
+                setUpdatedFields({
+                  duree_vie: rec.duree_vie,
+                  statut_reclamation: rec.statut_reclamation
+                });
+              }}>Consulter</button></td>
             </tr>
           ))}
         </tbody>
@@ -72,12 +93,36 @@ function HistoriqueTable({ enseigne }) {
         <div style={styles.overlay}>
           <div style={styles.modal}>
             <h3>Détails de la réclamation</h3>
-            <p><strong>Nom client :</strong> {selectedRec.nom_client}</p>
-            <p><strong>Date réclamation :</strong> {new Date(selectedRec.date_reclamation).toLocaleDateString()}</p>
-            <p><strong>Nom technicien :</strong> {selectedRec.nom_technicien}</p>
-            <p><strong>Durée de vie :</strong> {selectedRec.duree_vie}</p>
+            <p><strong>Date de réclamation:</strong> {new Date(selectedRec.date_reclamation).toLocaleDateString()}</p>
+            <p><strong>Client :</strong> {selectedRec.nom_client}</p>
+            <p><strong>Téléphone :</strong> {selectedRec.numero_telephone}</p>
             <p><strong>Libellé :</strong> {selectedRec.libelle}</p>
-            <button onClick={() => setSelectedRec(null)}>Fermer</button>
+            <p><strong>Contrat :</strong> {selectedRec.contrat}</p>
+            <p><strong>Motif :</strong> {selectedRec.motif}</p>
+            <p><strong>Technicien :</strong> {selectedRec.nom_technicien}</p>
+            <p><strong>Email technicien :</strong> {selectedRec.email_technicien}</p>
+
+            <label><strong>Durée de vie :</strong></label>
+            <input
+              type="text"
+              value={updatedFields.duree_vie}
+              onChange={(e) => handleEdit('duree_vie', e.target.value)}
+            />
+
+            <label><strong>Statut :</strong></label>
+            <select
+              value={updatedFields.statut_reclamation}
+              onChange={(e) => handleEdit('statut_reclamation', e.target.value)}
+            >
+              <option value="ouverte">ouverte</option>
+              <option value="en cours">en cours</option>
+              <option value="terminée">terminée</option>
+            </select>
+
+            <div style={{ marginTop: '15px' }}>
+              <button onClick={handleSave}>Enregistrer</button>
+              <button onClick={() => setSelectedRec(null)} style={{ marginLeft: '10px' }}>Fermer</button>
+            </div>
           </div>
         </div>
       )}

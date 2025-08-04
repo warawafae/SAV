@@ -22,6 +22,7 @@ function ReclamationForm({ onSuccess }) {
     contrat: "",
     emailTechnicien: "",
     motif: "",
+    statut_reclamation:"ouverte",
   });
 
   useEffect(() => {
@@ -92,6 +93,7 @@ function ReclamationForm({ onSuccess }) {
   nom_technicien: technicien,
   email_technicien: form.emailTechnicien,
   motif: form.motif,
+  statut_reclamation:form.statut_reclamation
 };
 
 
@@ -124,6 +126,8 @@ function ReclamationForm({ onSuccess }) {
           <div className="form-col">
             <label htmlFor="nomClient">Nom client</label>
             <input id="nomClient" name="nomClient" value={form.nomClient} onChange={handleChange} required />
+            <label htmlFor="staturec">statut de reclamation</label>
+            <input id="staturec" name="statutrec" value={form.statut_reclamation} onChange={handleChange} required />
 
             <label htmlFor="telephoneClient">Téléphone client</label>
             <input id="telephoneClient" name="telephoneClient" value={form.telephoneClient} onChange={handleChange} required />

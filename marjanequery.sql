@@ -20,12 +20,12 @@ statut VARCHAR(50) NOT NULL
 );
 INSERT INTO marjane_technicien(nom_complet_technicien,email_technicien,spécialité,statut)
 VALUES('sami iyad','samiiyad@gmail.com','TV','disponible'),
-('chami mehdi','chamimehdi@gmail.com','Plaque de cuisson','non disponible'),
+('chami mehdi','chamimehdi@gmail.com','Appareils cuisson','non disponible'),
 ('laid omar','laidomar@gmail.com','Machine à laver','disponible'),
-('bentali youssef','bentaliyoussef@gmail.com','Plaque de cuisson','non disponible'),
+('bentali youssef','bentaliyoussef@gmail.com','Appareils cuisson','disponible'),
 ('jani souhail','janimouad@gmail.com','Machine à laver','non disponible'),
 ('jaybi mouad','jaybimouad@gmail.com','Ordinateur portable','non disponible'),
-('tahi karim','tahikarim@gmail.com','Plaque de cuisson','disponible'),
+('tahi karim','tahikarim@gmail.com','Appareils cuisson','disponible'),
 ('tili samir','tilisamir@gmail.com','Ordinateur portable','disponible'),
 ('benfouad omar','benfouadomar@gmail.com','Smartphone','disponible');
 SELECT * FROM marjane_magasin;
@@ -54,5 +54,9 @@ SELECT nom_complet_technicien, email_technicien
 FROM marjane_technicien 
 WHERE spécialité = 'TV' AND statut = 'disponible';
 SELECT * FROM marjane_reclamations;
+DELETE FROM marjane_reclamations WHERE id=2;
+SELECT * FROM marjane_technicien;
+SELECT * FROM electroplanet_magasin;
 SELECT * FROM electroplanet_reclamations;
-DELETE FROM marjane_reclamations WHERE id = 7;
+SELECT * FROM electroplanet_technicien WHERE spécialité='Machine à laver';
+SELECT * FROM marjane_reclamations;

@@ -31,13 +31,14 @@ router.post("/:enseigne", async (req, res) => {
       numero_telephone,
       libelle,
       contrat,
-      nom_responsable = "Responsable Nom",
+      nom_responsable,
       nom_magasin,
       enseigne,
       specialite_technicien,
       nom_technicien,
       email_technicien,
       motif,
+      statut_reclamation,
     } = req.body;
 
     request.input("nom_client", sql.NVarChar(100), nom_client);
@@ -51,12 +52,13 @@ router.post("/:enseigne", async (req, res) => {
     request.input("nom_technicien", sql.NVarChar(100), nom_technicien);
     request.input("email_technicien", sql.NVarChar(100), email_technicien);
     request.input("motif", sql.NVarChar(255), motif);
+    request.input("statut_reclamation", sql.NVarChar(255), statut_reclamation);
 
     const query = `
       INSERT INTO ${table} 
-      (nom_client, numero_telephone, libelle, contrat, nom_responsable, nom_magasin, enseigne, specialite_technicien, nom_technicien, email_technicien, motif)
+      (nom_client, numero_telephone, libelle, contrat, nom_responsable, nom_magasin, enseigne, specialite_technicien, nom_technicien, email_technicien, motif, statut_reclamation)
       VALUES 
-      (@nom_client, @numero_telephone, @libelle, @contrat, @nom_responsable, @nom_magasin, @enseigne, @specialite_technicien, @nom_technicien, @email_technicien, @motif)
+      (@nom_client, @numero_telephone, @libelle, @contrat, @nom_responsable, @nom_magasin, @enseigne, @specialite_technicien, @nom_technicien, @email_technicien, @motif, @statut_reclamation)
     `;
 
     await request.query(query);
@@ -94,7 +96,7 @@ router.get("/:enseigne", async (req, res) => {
     request.input("nom_magasin", sql.NVarChar(100), nomMagasin);
 
     const query = `
-      SELECT nom_client, date_reclamation, nom_technicien, duree_vie, libelle 
+      SELECT id, nom_client, date_reclamation, nom_technicien, duree_vie, libelle, motif, email_technicien, contrat, numero_telephone, statut_reclamation
       FROM ${table}
       WHERE nom_magasin = @nom_magasin
       ORDER BY date_reclamation DESC
@@ -106,6 +108,75 @@ router.get("/:enseigne", async (req, res) => {
   } catch (error) {
     console.error("Erreur lors de la récupération :", error);
     res.status(500).json({ message: "Erreur serveur lors de la récupération" });
+  }
+});
+
+// PUT : Mettre à jour la durée de vie et le statut d'une réclamation
+// PUT : Mettre à jour la durée de vie et le statut d'une réclamation 
+router.put("/:enseigne/:id", async (req, res) => {
+  const { enseigne, id } = req.params;
+  const { duree_vie, statut_reclamation } = req.body;
+
+  let db, table, techtable;
+
+  if (enseigne === "marjane") {
+    db = dbMarjane;
+    table = "marjane_reclamations";
+    techtable = "marjane_technicien";
+  } else if (enseigne === "electroplanet") {
+    db = dbElectroplanet;
+    table = "electroplanet_reclamations";
+    techtable = "electroplanet_technicien";
+  } else {
+    return res.status(400).json({ message: "Enseigne invalide" });
+  }
+
+  try {
+    await db.poolConnect;
+
+    // Mise à jour de la réclamation
+    const updateRequest = db.pool.request();
+    updateRequest.input("id", sql.Int, id);
+    updateRequest.input("duree_vie", sql.NVarChar(100), duree_vie);
+    updateRequest.input("statut_reclamation", sql.NVarChar(100), statut_reclamation);
+
+    const updateQuery = `
+      UPDATE ${table}
+      SET duree_vie = @duree_vie, statut_reclamation = @statut_reclamation
+      WHERE id = @id
+    `;
+    await updateRequest.query(updateQuery);
+
+    // Récupération du nom du technicien concerné
+    const getTechNameResult = await db.pool.request()
+      .input("id", sql.Int, id)
+      .query(`SELECT nom_technicien FROM ${table} WHERE id = @id`);
+
+    const nom_technicien = getTechNameResult.recordset[0]?.nom_technicien;
+
+    if (!nom_technicien) {
+      return res.status(404).json({ message: "Technicien non trouvé pour cette réclamation" });
+    }
+
+    // Mise à jour du statut du technicien
+    const nouveauStatutTech = (statut_reclamation === "terminée") ? "disponible" : "non disponible";
+
+    const updateTechRequest = db.pool.request();
+    updateTechRequest.input("nom_technicien", sql.NVarChar(100), nom_technicien);
+    updateTechRequest.input("statut", sql.NVarChar(50), nouveauStatutTech);
+
+    const updateTechQuery = `
+      UPDATE ${techtable}
+      SET statut = @statut
+      WHERE nom_complet_technicien = @nom_technicien
+    `;
+    await updateTechRequest.query(updateTechQuery);
+
+    res.status(200).json({ message: "Réclamation et technicien mis à jour avec succès" });
+
+  } catch (err) {
+    console.error("Erreur lors de la mise à jour :", err);
+    res.status(500).json({ message: "Erreur serveur lors de la mise à jour" });
   }
 });
 
