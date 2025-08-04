@@ -13,11 +13,8 @@ const port = process.env.PORT || 5000;
 app.use(cors());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.json());
-const emailRoutes = require('./routes/email');
-app.use('/api/email', emailRoutes);
 // Fichiers statiques côté backend
 app.use(express.static(path.join(__dirname, "public")));
-
 // Routes API
 app.use("/api/reclamations", require("./routes/reclamation"));
 const technicienRoutes = require("./routes/techniciens");

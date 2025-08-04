@@ -1,3 +1,4 @@
+const { envoyerMailReclamation } = require("../utils/mailer");
 const express = require("express");
 const router = express.Router();
 const sql = require("mssql");
@@ -62,6 +63,22 @@ router.post("/:enseigne", async (req, res) => {
     `;
 
     await request.query(query);
+    try {
+  await envoyerMailReclamation({
+    to: email_technicien,
+    nomTechnicien: nom_technicien,
+    nomClient: nom_client,
+    motif,
+    libelle,
+    nommagasin:nom_magasin,
+    nomresponsablee:nom_responsable
+
+  });
+  console.log("✅ Email envoyé au technicien");
+} catch (mailErr) {
+  console.error("❌ Échec de l'envoi de l'email :", mailErr);
+}
+
     res.status(201).json({ message: "Réclamation enregistrée avec succès" });
   } catch (error) {
     console.error("Erreur lors de l'insertion :", error);

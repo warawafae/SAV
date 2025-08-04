@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import HistoriqueTable from "./HistoriqueReclamation";
-import ContactForm from "./EmailForm";
+import "./ResponsablePage.css"; // importe ton fichier CSS
 
 function ResponsablePage() {
   const [searchParams] = useSearchParams();
@@ -11,26 +11,30 @@ function ResponsablePage() {
   const nomMagasin = searchParams.get("nomMagasin");
   const nomResponsable = searchParams.get("nomResponsable");
 
-  // Stocker dans localStorage pour usage global si besoin
   useEffect(() => {
     if (enseigne && nomMagasin && nomResponsable) {
-      localStorage.setItem("user", JSON.stringify({ enseigne, nomMagasin, nomResponsable }));
+      localStorage.setItem(
+        "user",
+        JSON.stringify({ enseigne, nomMagasin, nomResponsable })
+      );
     }
   }, [enseigne, nomMagasin, nomResponsable]);
 
   const handleGoToForm = () => {
     navigate("/creer-reclamation", {
-      state: { enseigne }
+      state: { enseigne },
     });
   };
 
   return (
-    <div style={{ padding: "20px" }}>
-      <h2>Bienvenue {nomResponsable}</h2>
-      <button onClick={handleGoToForm} style={{ marginBottom: "20px" }}>
-        Créer une réclamation
-      </button>
-      <HistoriqueTable enseigne={enseigne} />
+    <div className="responsable-container">
+      <div className="fullscreen-page">
+  <h2 className="responsable-title">Bienvenue {nomResponsable}</h2>
+  <button className="btn-creer" onClick={handleGoToForm}>
+    Créer une réclamation
+  </button>
+  <HistoriqueTable enseigne={enseigne} />
+</div>
     </div>
   );
 }
