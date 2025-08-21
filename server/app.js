@@ -1,3 +1,4 @@
+require("dotenv").config();
 const express = require("express");
 const bodyParser = require("body-parser");
 const cors = require("cors");
@@ -56,11 +57,6 @@ app.get("/api/magasins/:enseigne", async (req, res) => {
 // Login : redirection vers frontend React (port 3000)
 app.post("/login", async (req, res) => {
   const { enseigne, magasin, nom_responsable, password, email } = req.body;
-
-  // Cas admin
-  if (!nom_responsable && !password) {
-    return res.render("admin", { nom: "Administrateur" });
-  }
 
   let db, table;
 

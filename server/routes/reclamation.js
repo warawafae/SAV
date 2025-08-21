@@ -196,6 +196,21 @@ router.put("/:enseigne/:id", async (req, res) => {
     res.status(500).json({ message: "Erreur serveur lors de la mise à jour" });
   }
 });
+router.get("/admin/all-reclamations", async (req, res) => {
+  try {
+    const marjaneData = await dbMarjane.query("SELECT * FROM marjane_reclamation");
+    const electroData = await dbElectroplanet.query("SELECT * FROM electroplanet_reclamation");
+
+    res.json({
+      marjane: marjaneData.recordset,
+      electroplanet: electroData.recordset
+    });
+  } catch (err) {
+    console.error("Erreur admin:", err);
+    res.status(500).json({ error: "Erreur serveur" });
+  }
+});
+
 
 
 module.exports = router;
