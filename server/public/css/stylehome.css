@@ -1,7 +1,7 @@
 body { 
   margin: 0;
   font-family: Arial, sans-serif;
-  background-color: #dad9d985;
+  background-color: #ffffff;
 }
 
 .auth-container {
@@ -12,7 +12,11 @@ body {
 .form-section {
   flex: 0.40;
   padding: 60px;
-  background-color: #877b7beb;
+
+
+
+background: #bbaea3;
+  /*background: linear-gradient(135deg, #8e6e6e,#655353);*/
   display: flex;
   flex-direction: column;
   justify-content: center;

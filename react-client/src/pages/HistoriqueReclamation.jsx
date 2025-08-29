@@ -85,7 +85,7 @@ return (
                 backgroundColor:
                   rec.statut_reclamation === 'ouverte' ? '#b92116ff' :
                   rec.statut_reclamation === 'en cours' ? '#4d9cb6ff' :
-                  '#277b3bff'
+                  '#22a140ff'
               }}>
                 {rec.statut_reclamation}
               </span>
@@ -154,12 +154,12 @@ const styles = {
   table: {
     width: '100%',
     borderCollapse: 'collapse',
-    boxShadow: '0 5px 5px rgba(111, 75, 75, 1)',
+    boxShadow: '0 5px 5px rgba(58, 20, 20, 1)',
     marginBottom: '6px',
     backgroundColor: '#ffffffe3'
   },
   thead: {
-    backgroundColor: '#311717e2',
+    backgroundColor: '#5ea8b1 ', //head of reclamtion table 
     color:'#ffffffe3'
   },
   row: {
