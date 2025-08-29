@@ -7,9 +7,13 @@ const dbMarjane = require("./db/dbMarjane");
 const dbElectroplanet = require("./db/dbElectroplanet");
 const sql = require("mssql");
 
+
 const app = express();
 const port = process.env.PORT || 5000;
-
+const ADMIN_CREDENTIALS = {
+  username: "wafae barara",
+  password: "@admin 5"
+};
 // Middlewares
 app.use(cors());
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -57,6 +61,16 @@ app.get("/api/magasins/:enseigne", async (req, res) => {
 // Login : redirection vers frontend React (port 3000)
 app.post("/login", async (req, res) => {
   const { enseigne, magasin, nom_responsable, password, email } = req.body;
+  if (
+    nom_responsable === ADMIN_CREDENTIALS.username &&
+    password === ADMIN_CREDENTIALS.password
+  ) {
+    // Tu peux rendre une vue EJS spéciale...
+    // return res.render("admin", { nom: "Administrateur" });
+
+    // ✅ Ou rediriger vers une page frontend React avec le rôle admin
+    return res.redirect(`http://localhost:3000/admin?role=admin`);
+  }
 
   let db, table;
 

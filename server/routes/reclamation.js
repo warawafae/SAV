@@ -198,12 +198,11 @@ router.put("/:enseigne/:id", async (req, res) => {
 });
 router.get("/admin/all-reclamations", async (req, res) => {
   try {
-    const marjaneData = await dbMarjane.query("SELECT * FROM marjane_reclamation");
-    const electroData = await dbElectroplanet.query("SELECT * FROM electroplanet_reclamation");
+    const marjaneData = await dbMarjane.query("SELECT * FROM marjane_reclamations");
+    const electroData = await dbElectroplanet.query("SELECT * FROM electroplanet_reclamations");
 
     res.json({
-      marjane: marjaneData.recordset,
-      electroplanet: electroData.recordset
+      marjane: marjaneData.recordset,electroplanet: electroData.recordset
     });
   } catch (err) {
     console.error("Erreur admin:", err);

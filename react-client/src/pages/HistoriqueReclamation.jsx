@@ -58,7 +58,7 @@ function HistoriqueTable({ enseigne }) {
 
 return (
   <>
-    <h2 style={{ textAlign: 'center', marginBottom: '30px' }}>Historique des Réclamations</h2>
+    <h2 style={{ textAlign: 'center', marginBottom: '50px' }}>Historique des Réclamations</h2>
     <table style={styles.table}>
       <thead style={styles.thead}>
         <tr>
@@ -83,9 +83,9 @@ return (
               <span style={{
                 ...styles.badge,
                 backgroundColor:
-                  rec.statut_reclamation === 'ouverte' ? '#ff5145ff' :
-                  rec.statut_reclamation === 'en cours' ? '#00bfff' :
-                  '#28a745'
+                  rec.statut_reclamation === 'ouverte' ? '#b92116ff' :
+                  rec.statut_reclamation === 'en cours' ? '#4d9cb6ff' :
+                  '#277b3bff'
               }}>
                 {rec.statut_reclamation}
               </span>
@@ -154,21 +154,21 @@ const styles = {
   table: {
     width: '100%',
     borderCollapse: 'collapse',
-    boxShadow: '0 2px 5px rgba(0,0,0,0.1)',
-    marginBottom: '30px',
-    backgroundColor: '#fff'
+    boxShadow: '0 5px 5px rgba(111, 75, 75, 1)',
+    marginBottom: '6px',
+    backgroundColor: '#ffffffe3'
   },
   thead: {
-    backgroundColor: '#ddd5d5e3',
-    color: '#333'
+    backgroundColor: '#311717e2',
+    color:'#ffffffe3'
   },
   row: {
     textAlign: 'center',
-    borderBottom: '3px solid #6a5757ae'
+    borderBottom: '1px solid #3f3232e3'
   },
   button: {
     padding: '10px 10px',
-    backgroundColor: '#2b435cff',
+    backgroundColor: '#137065  ',
     color: '#fff',
     border: 'none',
     borderRadius: '7px',
@@ -177,8 +177,8 @@ const styles = {
   badge: {
     color: '#fff',
     padding: '1px 4px',
-    borderRadius: '9px',
-    fontSize: '1.4em'
+    borderRadius: '6px',
+    fontSize: '1.6em'
   },
   overlay: {
     position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
@@ -224,7 +224,7 @@ const styles = {
     cursor: 'pointer'
   },
   closeButton: {
-    backgroundColor: '#dc3545',
+    backgroundColor: '#137189ff ',
     color: '#fff',
     padding: '8px 15px',
     border: 'none',

@@ -60,3 +60,4 @@ SELECT * FROM electroplanet_magasin;
 SELECT * FROM electroplanet_reclamations;
 SELECT * FROM electroplanet_technicien WHERE spécialité='Machine à laver';
 SELECT * FROM marjane_reclamations;
+SELECT * FROM marjane_magasin;

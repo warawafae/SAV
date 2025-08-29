@@ -1,6 +1,7 @@
 // src/pages/AdminPage.jsx
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import "./AdminPage.modules.css"; // import du CSS
 
 const AdminPage = () => {
   const [marjaneReclamations, setMarjaneReclamations] = useState([]);
@@ -24,66 +25,88 @@ const AdminPage = () => {
   }, []);
 
   return (
-    <div style={{ padding: "20px", fontFamily: "Arial" }}>
-      <h1 style={{ textAlign: "center" }}>Interface Administrateur</h1>
+    <div className="admin-container">
+      {/* Sidebar gauche */}
+      <nav className="sidebar">
+        <h2>Menu</h2>
+        <ul>
+          <li><a href="#marjane">Réclamations Marjane</a></li>
+          <li><a href="#electro">Réclamations Electroplanet</a></li>
+          <li><a href="#stats">Statistiques</a></li>
+          <li><a href="#logout">Déconnexion</a></li>
+        </ul>
+      </nav>
 
-      {loading ? (
-        <p>Chargement des réclamations...</p>
-      ) : (
-        <>
-          <h2>Réclamations Marjane</h2>
-          <table border="1" cellPadding="5" style={{ width: "100%", marginBottom: "40px" }}>
-            <thead>
-              <tr>
-                <th>ID</th>
-                <th>Libellé</th>
-                <th>Magasin</th>
-                <th>Date</th>
-                <th>Technicien</th>
-                <th>Statut</th>
-              </tr>
-            </thead>
-            <tbody>
-              {marjaneReclamations.map((rec) => (
-                <tr key={rec.id}>
-                  <td>{rec.id}</td>
-                  <td>{rec.libelle}</td>
-                  <td>{rec.nom_magasin}</td>
-                  <td>{new Date(rec.date_reclamation).toLocaleDateString()}</td>
-                  <td>{rec.nom_technicien}</td>
-                  <td>{rec.statut}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+      {/* Contenu principal */}
+      <div className="content">
+        <h1>Bienvenue </h1>
 
-          <h2>Réclamations Electroplanet</h2>
-          <table border="1" cellPadding="5" style={{ width: "100%" }}>
-            <thead>
-              <tr>
-                <th>ID</th>
-                <th>Libellé</th>
-                <th>Magasin</th>
-                <th>Date</th>
-                <th>Technicien</th>
-                <th>Statut</th>
-              </tr>
-            </thead>
-            <tbody>
-              {electroReclamations.map((rec) => (
-                <tr key={rec.id}>
-                  <td>{rec.id}</td>
-                  <td>{rec.libelle}</td>
-                  <td>{rec.nom_magasin}</td>
-                  <td>{new Date(rec.date_reclamation).toLocaleDateString()}</td>
-                  <td>{rec.nom_technicien}</td>
-                  <td>{rec.statut}</td>
+        {loading ? (
+          <p>Chargement des réclamations...</p>
+        ) : (
+          <>
+            <h2 id="marjane">Réclamations Marjane</h2>
+            <table>
+              <thead>
+                <tr>
+                  <th>Contrat</th>
+                  <th>Client</th>
+                  <th>Libellé</th>
+                  <th>Magasin</th>
+                  <th>Date</th>
+                  <th>Technicien</th>
+                  <th>Statut</th>
+                  <th>Motif</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </>
-      )}
+              </thead>
+              <tbody>
+                {marjaneReclamations.map((rec) => (
+                  <tr key={rec.id}>
+                    <td>{rec.contrat}</td>
+                    <td>{rec.nom_client}</td>
+                    <td>{rec.libelle}</td>
+                    <td>{rec.nom_magasin}</td>
+                    <td>{new Date(rec.date_reclamation).toLocaleDateString()}</td>
+                    <td>{rec.nom_technicien}</td>
+                    <td>{rec.statut_reclamation}</td>
+                    <td>{rec.motif}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+
+            <h2 id="electro">Réclamations Electroplanet</h2>
+            <table>
+              <thead>
+                <tr>
+                  <th>Contrat</th>
+                  <th>Client</th>
+                  <th>Libellé</th>
+                  <th>Magasin</th>
+                  <th>Date</th>
+                  <th>Technicien</th>
+                  <th>Statut</th>
+                  <th>Motif</th>
+                </tr>
+              </thead>
+              <tbody>
+                {electroReclamations.map((rec) => (
+                  <tr key={rec.id}>
+                    <td>{rec.contrat}</td>
+                    <td>{rec.nom_client}</td>
+                    <td>{rec.libelle}</td>
+                    <td>{rec.nom_magasin}</td>
+                    <td>{new Date(rec.date_reclamation).toLocaleDateString()}</td>
+                    <td>{rec.nom_technicien}</td>
+                    <td>{rec.statut_reclamation}</td>
+                    <td>{rec.motif}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </>
+        )}
+      </div>
     </div>
   );
 };
