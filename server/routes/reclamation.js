@@ -63,21 +63,21 @@ router.post("/:enseigne", async (req, res) => {
     `;
 
     await request.query(query);
-    try {
-  await envoyerMailReclamation({
-    to: email_technicien,
-    nomTechnicien: nom_technicien,
-    nomClient: nom_client,
-    motif,
-    libelle,
-    nommagasin:nom_magasin,
-    nomresponsablee:nom_responsable
 
-  });
-  console.log("✅ Email envoyé au technicien");
-} catch (mailErr) {
-  console.error("❌ Échec de l'envoi de l'email :", mailErr);
-}
+    try {
+      await envoyerMailReclamation({
+        to: email_technicien,
+        nomTechnicien: nom_technicien,
+        nomClient: nom_client,
+        motif,
+        libelle,
+        nommagasin: nom_magasin,
+        nomresponsablee: nom_responsable,
+      });
+      console.log("✅ Email envoyé au technicien");
+    } catch (mailErr) {
+      console.error("❌ Échec de l'envoi de l'email :", mailErr);
+    }
 
     res.status(201).json({ message: "Réclamation enregistrée avec succès" });
   } catch (error) {
@@ -129,7 +129,6 @@ router.get("/:enseigne", async (req, res) => {
 });
 
 // PUT : Mettre à jour la durée de vie et le statut d'une réclamation
-// PUT : Mettre à jour la durée de vie et le statut d'une réclamation 
 router.put("/:enseigne/:id", async (req, res) => {
   const { enseigne, id } = req.params;
   const { duree_vie, statut_reclamation } = req.body;
@@ -190,26 +189,65 @@ router.put("/:enseigne/:id", async (req, res) => {
     await updateTechRequest.query(updateTechQuery);
 
     res.status(200).json({ message: "Réclamation et technicien mis à jour avec succès" });
-
   } catch (err) {
     console.error("Erreur lors de la mise à jour :", err);
     res.status(500).json({ message: "Erreur serveur lors de la mise à jour" });
   }
 });
+
+// GET : Historique pour admin (top 3)
 router.get("/admin/all-reclamations", async (req, res) => {
   try {
-    const marjaneData = await dbMarjane.query("SELECT * FROM marjane_reclamations");
-    const electroData = await dbElectroplanet.query("SELECT * FROM electroplanet_reclamations");
+    const marjaneData = await dbMarjane.query("SELECT TOP 3 * FROM marjane_reclamations");
+    const electroData = await dbElectroplanet.query("SELECT TOP 3 * FROM electroplanet_reclamations");
 
-    res.json({
-      marjane: marjaneData.recordset,electroplanet: electroData.recordset
-    });
+    res.json({ marjane: marjaneData.recordset, electroplanet: electroData.recordset });
   } catch (err) {
     console.error("Erreur admin:", err);
     res.status(500).json({ error: "Erreur serveur" });
   }
 });
 
+// ✅ NOUVELLE ROUTE : Recherche par enseigne + contrat (obligatoire enseigne)
+router.get("/admin/search", async (req, res) => {
+  const { enseigne, contrat } = req.query;
 
+  if (!enseigne) {
+    return res.status(400).json({ message: "Veuillez sélectionner une enseigne avant la recherche" });
+  }
+
+  let db, table;
+
+  if (enseigne.toLowerCase() === "marjane") {
+    db = dbMarjane;
+    table = "marjane_reclamations";
+  } else if (enseigne.toLowerCase() === "electroplanet") {
+    db = dbElectroplanet;
+    table = "electroplanet_reclamations";
+  } else {
+    return res.status(400).json({ message: "Enseigne invalide" });
+  }
+
+  try {
+    await db.poolConnect;
+    const request = db.pool.request();
+
+    if (contrat) {
+      request.input("contrat", sql.NVarChar(100), `%${contrat}%`);
+    }
+
+    let query = `SELECT * FROM ${table}`;
+    if (contrat) {
+      query += ` WHERE contrat LIKE @contrat`;
+    }
+    query += ` ORDER BY date_reclamation DESC`;
+
+    const result = await request.query(query);
+    res.json(result.recordset);
+  } catch (err) {
+    console.error("Erreur recherche admin :", err);
+    res.status(500).json({ message: "Erreur serveur lors de la recherche" });
+  }
+});
 
 module.exports = router;

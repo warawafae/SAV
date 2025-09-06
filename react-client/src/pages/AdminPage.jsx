@@ -26,6 +26,10 @@ const AdminPage = () => {
     specialite: "",
   });
 
+  // ✅ nouveaux états pour filtres
+  const [selectedEnseigne, setSelectedEnseigne] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
+
   useEffect(() => {
     const fetchReclamations = async () => {
       try {
@@ -122,6 +126,25 @@ const AdminPage = () => {
     }
   };
 
+  // ----------------- Filtrage -----------------
+  const filterReclamations = (data, enseigne) => {
+    let result = data;
+
+    // Filtre par enseigne
+    if (selectedEnseigne && selectedEnseigne !== enseigne) {
+      return [];
+    }
+
+    // Filtre par contrat
+    if (searchTerm.trim() !== "") {
+      result = result.filter((rec) =>
+        rec.contrat.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+
+    return result;
+  };
+
   // ----------------- JSX -----------------
   return (
     <div className="admin-container" style={{ display: "flex" }}>
@@ -152,16 +175,40 @@ const AdminPage = () => {
 
             <h3>Magasins</h3>
             <ul>
-              <li><button onClick={() => setModalType("addMagasin")}>➕ Ajouter magasin</button></li>
-              <li><button onClick={() => setModalType("editMagasin")}>✏️ Modifier magasin</button></li>
-              <li><button onClick={() => setModalType("deleteMagasin")}>🗑️ Supprimer magasin</button></li>
+              <li>
+                <button onClick={() => setModalType("addMagasin")}>
+                  ➕ Ajouter magasin
+                </button>
+              </li>
+              <li>
+                <button onClick={() => setModalType("editMagasin")}>
+                  ✏️ Modifier magasin
+                </button>
+              </li>
+              <li>
+                <button onClick={() => setModalType("deleteMagasin")}>
+                  🗑️ Supprimer magasin
+                </button>
+              </li>
             </ul>
 
             <h3>Techniciens</h3>
             <ul>
-              <li><button onClick={() => setModalType("addTech")}>➕ Ajouter technicien</button></li>
-              <li><button onClick={() => setModalType("editTech")}>✏️ Modifier technicien</button></li>
-              <li><button onClick={() => setModalType("deleteTech")}>🗑️ Supprimer technicien</button></li>
+              <li>
+                <button onClick={() => setModalType("addTech")}>
+                  ➕ Ajouter technicien
+                </button>
+              </li>
+              <li>
+                <button onClick={() => setModalType("editTech")}>
+                  ✏️ Modifier technicien
+                </button>
+              </li>
+              <li>
+                <button onClick={() => setModalType("deleteTech")}>
+                  🗑️ Supprimer technicien
+                </button>
+              </li>
             </ul>
 
             <a href="http://localhost:5000/">Déconnexion</a>
@@ -172,35 +219,76 @@ const AdminPage = () => {
       {/* -------- Contenu principal -------- */}
       <div className="content" style={{ flex: 1, padding: "20px" }}>
         <h1>Bienvenue</h1>
-        {loading ? (
-          <p>Chargement des réclamations...</p>
-        ) : (
-          <>
-            <h2 id="marjane">Réclamations Marjane</h2>
-            <TableReclamations data={marjaneReclamations} />
 
-            <h2 id="electro">Réclamations Electroplanet</h2>
-            <TableReclamations data={electroReclamations} />
-          </>
-        )}
+        {/* ✅ Formulaire de filtres */}
+        <div className="filter-bar">
+  <label htmlFor="enseigne">Enseigne:</label>
+  <select
+    id="enseigne"
+    value={selectedEnseigne}
+    onChange={(e) => setSelectedEnseigne(e.target.value)}
+  >
+    <option value="">-- Toutes --</option>
+    <option value="marjane">Marjane</option>
+    <option value="electroplanet">Electroplanet</option>
+  </select>
+
+  <label htmlFor="search">Contrat:</label>
+  <input
+    type="search"
+    id="search"
+    value={searchTerm}
+    onChange={(e) => setSearchTerm(e.target.value)}
+    placeholder="N° contrat"
+  />
+</div>
+
+
+        {/* Affichage conditionnel des tableaux */}
+{(!selectedEnseigne || selectedEnseigne === "marjane") && (
+  <>
+    <h2 id="marjane">Réclamations Marjane</h2>
+    <TableReclamations data={filterReclamations(marjaneReclamations, "marjane")} />
+  </>
+)}
+
+{(!selectedEnseigne || selectedEnseigne === "electroplanet") && (
+  <>
+    <h2 id="electroplanet">Réclamations Electroplanet</h2>
+    <TableReclamations data={filterReclamations(electroReclamations, "electroplanet")} />
+  </>
+)}
+
       </div>
 
       {/* ----------------- Modals ----------------- */}
-      {(modalType === "addMagasin" || modalType === "editMagasin" || modalType === "deleteMagasin") && (
+      {(modalType === "addMagasin" ||
+        modalType === "editMagasin" ||
+        modalType === "deleteMagasin") && (
         <Modal
-          title={modalType === "addMagasin" ? "Ajouter Magasin" :
-                 modalType === "editMagasin" ? "Modifier Magasin" : "Supprimer Magasin"}
+          title={
+            modalType === "addMagasin"
+              ? "Ajouter Magasin"
+              : modalType === "editMagasin"
+              ? "Modifier Magasin"
+              : "Supprimer Magasin"
+          }
           onClose={() => setModalType(null)}
           onSubmit={
-            modalType === "addMagasin" ? handleAddMagasin :
-            modalType === "editMagasin" ? handleEditMagasin : handleDeleteMagasin
+            modalType === "addMagasin"
+              ? handleAddMagasin
+              : modalType === "editMagasin"
+              ? handleEditMagasin
+              : handleDeleteMagasin
           }
         >
           <label>
             Enseigne:
             <select
               value={magasinData.enseigne}
-              onChange={(e) => setMagasinData({ ...magasinData, enseigne: e.target.value })}
+              onChange={(e) =>
+                setMagasinData({ ...magasinData, enseigne: e.target.value })
+              }
             >
               <option value="marjane">Marjane</option>
               <option value="electroplanet">Electroplanet</option>
@@ -211,45 +299,85 @@ const AdminPage = () => {
             <input
               type="text"
               value={magasinData.nom_magasin}
-              onChange={(e) => setMagasinData({ ...magasinData, nom_magasin: e.target.value })}
+              onChange={(e) =>
+                setMagasinData({ ...magasinData, nom_magasin: e.target.value })
+              }
               required
             />
           </label>
-          {(modalType !== "deleteMagasin") && <>
-            <label>Nom responsable:
-              <input type="text" value={magasinData.nom_responsable} 
-                onChange={(e) => setMagasinData({ ...magasinData, nom_responsable: e.target.value })}
-                required />
-            </label>
-            <label>Email:
-              <input type="email" value={magasinData.email} 
-                onChange={(e) => setMagasinData({ ...magasinData, email: e.target.value })}
-                required />
-            </label>
-            <label>Mot de passe:
-              <input type="password" value={magasinData.mot_de_passe} 
-                onChange={(e) => setMagasinData({ ...magasinData, mot_de_passe: e.target.value })}
-                required />
-            </label>
-          </>}
+          {modalType !== "deleteMagasin" && (
+            <>
+              <label>
+                Nom responsable:
+                <input
+                  type="text"
+                  value={magasinData.nom_responsable}
+                  onChange={(e) =>
+                    setMagasinData({
+                      ...magasinData,
+                      nom_responsable: e.target.value,
+                    })
+                  }
+                  required
+                />
+              </label>
+              <label>
+                Email:
+                <input
+                  type="email"
+                  value={magasinData.email}
+                  onChange={(e) =>
+                    setMagasinData({ ...magasinData, email: e.target.value })
+                  }
+                  required
+                />
+              </label>
+              <label>
+                Mot de passe:
+                <input
+                  type="password"
+                  value={magasinData.mot_de_passe}
+                  onChange={(e) =>
+                    setMagasinData({
+                      ...magasinData,
+                      mot_de_passe: e.target.value,
+                    })
+                  }
+                  required
+                />
+              </label>
+            </>
+          )}
         </Modal>
       )}
 
-      {(modalType === "addTech" || modalType === "editTech" || modalType === "deleteTech") && (
+      {(modalType === "addTech" ||
+        modalType === "editTech" ||
+        modalType === "deleteTech") && (
         <Modal
-          title={modalType === "addTech" ? "Ajouter Technicien" :
-                 modalType === "editTech" ? "Modifier Technicien" : "Supprimer Technicien"}
+          title={
+            modalType === "addTech"
+              ? "Ajouter Technicien"
+              : modalType === "editTech"
+              ? "Modifier Technicien"
+              : "Supprimer Technicien"
+          }
           onClose={() => setModalType(null)}
           onSubmit={
-            modalType === "addTech" ? handleAddTech :
-            modalType === "editTech" ? handleEditTech : handleDeleteTech
+            modalType === "addTech"
+              ? handleAddTech
+              : modalType === "editTech"
+              ? handleEditTech
+              : handleDeleteTech
           }
         >
           <label>
             Enseigne:
             <select
               value={techData.enseigne}
-              onChange={(e) => setTechData({ ...techData, enseigne: e.target.value })}
+              onChange={(e) =>
+                setTechData({ ...techData, enseigne: e.target.value })
+              }
             >
               <option value="marjane">Marjane</option>
               <option value="electroplanet">Electroplanet</option>
@@ -260,20 +388,41 @@ const AdminPage = () => {
             <input
               type="text"
               value={techData.nom_technicien}
-              onChange={(e) => setTechData({ ...techData, nom_technicien: e.target.value })}
+              onChange={(e) =>
+                setTechData({
+                  ...techData,
+                  nom_technicien: e.target.value,
+                })
+              }
               required
             />
           </label>
-          {(modalType !== "deleteTech") && <>
-            <label>Email:
-              <input type="email" value={techData.email} 
-                onChange={(e) => setTechData({ ...techData, email: e.target.value })} required />
-            </label>
-            <label>Spécialité:
-              <input type="text" value={techData.specialite} 
-                onChange={(e) => setTechData({ ...techData, specialite: e.target.value })} required />
-            </label>
-          </>}
+          {modalType !== "deleteTech" && (
+            <>
+              <label>
+                Email:
+                <input
+                  type="email"
+                  value={techData.email}
+                  onChange={(e) =>
+                    setTechData({ ...techData, email: e.target.value })
+                  }
+                  required
+                />
+              </label>
+              <label>
+                Spécialité:
+                <input
+                  type="text"
+                  value={techData.specialite}
+                  onChange={(e) =>
+                    setTechData({ ...techData, specialite: e.target.value })
+                  }
+                  required
+                />
+              </label>
+            </>
+          )}
         </Modal>
       )}
     </div>
@@ -321,7 +470,9 @@ const Modal = ({ title, children, onClose, onSubmit }) => (
         {children}
         <div className="modal-buttons">
           <button type="submit">Valider</button>
-          <button type="button" onClick={onClose}>Annuler</button>
+          <button type="button" onClick={onClose}>
+            Annuler
+          </button>
         </div>
       </form>
     </div>

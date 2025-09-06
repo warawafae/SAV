@@ -4,7 +4,7 @@ html, body, #root {
   height: 100%;
   width: 100%;
   font-family: Arial, sans-serif;
-background:#e0d0c1;
+background:#e1dbdb2c;
    /* couleur de fond discrète */
 }
 .fullscreen-page {
@@ -22,7 +22,7 @@ background:#e0d0c1;
 }
 
 .btn-creer {
-  background-color: #9e377f;
+  background-color: #06367d;
   color: rgb(255, 255, 255);
   padding: 10px 20px;
   font-size: 16px;

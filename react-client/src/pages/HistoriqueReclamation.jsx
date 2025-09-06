@@ -83,9 +83,9 @@ return (
               <span style={{
                 ...styles.badge,
                 backgroundColor:
-                  rec.statut_reclamation === 'ouverte' ? '#b92116ff' :
-                  rec.statut_reclamation === 'en cours' ? '#4d9cb6ff' :
-                  '#22a140ff'
+                  rec.statut_reclamation === 'ouverte' ? '#e71809ff' :
+                  rec.statut_reclamation === 'en cours' ? '#0ea1d2ff' :
+                  '#1daf3fff'
               }}>
                 {rec.statut_reclamation}
               </span>
@@ -159,7 +159,7 @@ const styles = {
     backgroundColor: '#ffffffe3'
   },
   thead: {
-    backgroundColor: '#5ea8b1 ', //head of reclamtion table 
+    backgroundColor: 'rgb(102, 52, 3); ', //head of reclamtion table 
     color:'#ffffffe3'
   },
   row: {

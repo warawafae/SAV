@@ -15,9 +15,10 @@ body {
 
 
 
-background: #bbaea3;
+background:#817573de;
   /*background: linear-gradient(135deg, #8e6e6e,#655353);*/
   display: flex;
+  color: #000000;
   flex-direction: column;
   justify-content: center;
   position: relative; /* nécessaire pour placer le logo en absolu à l’intérieur */

@@ -2,7 +2,7 @@ const sql = require('mssql');
 
 const config = {
   user: 'SAVUSER',       // Exemple: 'sa'
-  password: '12Br@',
+  password: '1we',
   server: 'localhost',
   database: 'Electroplanet', 
   port: 1433,    // Nom exact de ta base

@@ -2,7 +2,7 @@ const sql = require('mssql');
 
 const config = {
   user: 'SAVUSER',
-  password: '12Br@',
+  password: '1we',
   server: 'localhost',
   database: 'Marjane',
   port: 1433,

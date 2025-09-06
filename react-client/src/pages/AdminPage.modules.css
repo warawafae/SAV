@@ -1,14 +1,49 @@
 /* AdminPage.modules.css */
 
 /* Container global */
+/* --- Zone de filtres --- */
+.filter-bar {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 20px;
+  background: rgba(0, 0, 0, 0.1);
+  padding: 12px 15px;
+  border-radius: 8px;
+  width: fit-content; /* s'adapte au contenu */
+  margin-left:auto;
+}
 
-/* Fond spécifique Admin */
+.filter-bar label {
+  font-size: 0.95rem;
+  color: #000000;
+}
+
+.filter-bar select,
+.filter-bar input[type="search"] {
+  padding: 8px 10px;
+  border-radius: 6px;
+  border: none;
+  outline: none;
+  font-size: 0.95rem;
+}
+
+.filter-bar select {
+  background: #fff;
+  color: #333;
+}
+
+.filter-bar input[type="search"] {
+  background: #fff;
+  color: #333;
+  min-width: 160px;
+}
+
 .adminBackground {
   display: flex;             /* Flex pour sidebar + contenu */
   min-height: 100vh;         /* prend toute la hauteur de la page */
   width: 100%;
-  background: linear-gradient(135deg, #141e30, #243b55);
-  color: white;
+  color: rgb(255, 255, 255);
   box-sizing: border-box;
   overflow: hidden;
 }
@@ -16,12 +51,12 @@
 /* --- Sidebar --- */
 .sidebar {
   width: 240px;
-  background-color: #ad66a1;
-  color: rgb(0, 0, 0);
+  background-color:#605553;
+  color: rgb(255, 255, 255);
   padding: 20px;
   display: flex;
   flex-direction: column;
-   height: 100vh;
+  height:100vh;
   box-shadow: 3px 0 6px rgba(0, 0, 0, 0.2);
 }
 
@@ -72,27 +107,27 @@
   text-align: center;
   padding: 12px;
   color: #fff;
-  background: #832a6e;
+  background: #5e3737;
   border-radius: 6px;
   text-decoration: none;
   transition: background 0.3s;
 }
 
 .sidebar a:hover {
-  background: #3e1c0f;
+  background: #c15d36;
 }
 
 /* --- Contenu principal --- */
 .content {
   flex: 1;                /* prend tout l’espace restant */
-  padding: 30px;
+  padding:30px;
   overflow-y: auto;       /* scroll si contenu dépasse */
 }
 
 /* --- Titres --- */
 .content h1 {
   font-size: 2rem;
-  margin-bottom: 20px;
+  margin-bottom:2px;
 }
 
 .content h2 {
@@ -112,7 +147,7 @@ table {
 }
 
 thead {
-  background-color: #5ea8b1;
+  background-color: rgb(102, 52, 3);
   color: white;
 }
 
