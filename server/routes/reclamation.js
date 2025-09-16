@@ -207,47 +207,4 @@ router.get("/admin/all-reclamations", async (req, res) => {
     res.status(500).json({ error: "Erreur serveur" });
   }
 });
-
-// ✅ NOUVELLE ROUTE : Recherche par enseigne + contrat (obligatoire enseigne)
-router.get("/admin/search", async (req, res) => {
-  const { enseigne, contrat } = req.query;
-
-  if (!enseigne) {
-    return res.status(400).json({ message: "Veuillez sélectionner une enseigne avant la recherche" });
-  }
-
-  let db, table;
-
-  if (enseigne.toLowerCase() === "marjane") {
-    db = dbMarjane;
-    table = "marjane_reclamations";
-  } else if (enseigne.toLowerCase() === "electroplanet") {
-    db = dbElectroplanet;
-    table = "electroplanet_reclamations";
-  } else {
-    return res.status(400).json({ message: "Enseigne invalide" });
-  }
-
-  try {
-    await db.poolConnect;
-    const request = db.pool.request();
-
-    if (contrat) {
-      request.input("contrat", sql.NVarChar(100), `%${contrat}%`);
-    }
-
-    let query = `SELECT * FROM ${table}`;
-    if (contrat) {
-      query += ` WHERE contrat LIKE @contrat`;
-    }
-    query += ` ORDER BY date_reclamation DESC`;
-
-    const result = await request.query(query);
-    res.json(result.recordset);
-  } catch (err) {
-    console.error("Erreur recherche admin :", err);
-    res.status(500).json({ message: "Erreur serveur lors de la recherche" });
-  }
-});
-
 module.exports = router;

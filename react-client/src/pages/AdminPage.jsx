@@ -127,23 +127,53 @@ const AdminPage = () => {
   };
 
   // ----------------- Filtrage -----------------
-  const filterReclamations = (data, enseigne) => {
-    let result = data;
+// ----------------- Filtrage côté affichage -----------------
+const filterReclamations = (data, enseigne) => {
+  // Si l’utilisateur a sélectionné une enseigne différente, ne rien afficher
+  if (selectedEnseigne && selectedEnseigne !== enseigne.toLowerCase()) return [];
+  
+  // Sinon, on affiche tout (le filtrage exact se fait via la recherche API)
+  return data;
+};
 
-    // Filtre par enseigne
-    if (selectedEnseigne && selectedEnseigne !== enseigne) {
-      return [];
+// ----------------- Recherche par contrat côté backend -----------------
+const handleSearch = async () => {
+  if (!selectedEnseigne || searchTerm.trim() === "") {
+    alert("Veuillez sélectionner une enseigne et saisir un contrat");
+    return;
+  }
+
+  try {
+    const response = await axios.get(
+      `http://localhost:5000/admin/search`,
+      {
+        params: {
+          enseigne: selectedEnseigne,
+          contrat: searchTerm.trim(),
+        },
+      }
+    );
+
+    // Remplacer complètement les tableaux selon l’enseigne
+    if (selectedEnseigne.toLowerCase() === "marjane") {
+      setMarjaneReclamations(response.data);
+      setElectroReclamations([]); // vider l'autre tableau
+    } else if (selectedEnseigne.toLowerCase() === "electroplanet") {
+      setElectroReclamations(response.data);
+      setMarjaneReclamations([]); // vider l'autre tableau
     }
-
-    // Filtre par contrat
-    if (searchTerm.trim() !== "") {
-      result = result.filter((rec) =>
-        rec.contrat.toLowerCase().includes(searchTerm.toLowerCase())
-      );
+  } catch (err) {
+    if (err.response && err.response.status === 404) {
+      alert("Aucune réclamation trouvée pour ce contrat");
+      if (selectedEnseigne.toLowerCase() === "marjane") setMarjaneReclamations([]);
+      else if (selectedEnseigne.toLowerCase() === "electroplanet") setElectroReclamations([]);
+    } else {
+      console.error(err);
+      alert("Erreur lors de la recherche");
     }
+  }
+};
 
-    return result;
-  };
 
   // ----------------- JSX -----------------
   return (
@@ -233,14 +263,27 @@ const AdminPage = () => {
     <option value="electroplanet">Electroplanet</option>
   </select>
 
-  <label htmlFor="search">Contrat:</label>
+   <label htmlFor="search">Contrat:</label>
   <input
-    type="search"
+    type="text"
     id="search"
     value={searchTerm}
     onChange={(e) => setSearchTerm(e.target.value)}
     placeholder="N° contrat"
+    onKeyDown={(e) => {
+      if (e.key === "Enter") handleSearch();
+    }}
   />
+  <button onClick={handleSearch}  style={{
+    backgroundColor: "#042a4dff",
+    color: "white",
+    border: "none",
+    padding: "8px 16px",
+    marginLeft: "10px",
+    borderRadius: "5px",
+    cursor: "pointer",
+    fontSize: "14px",
+  }}>Rechercher</button>
 </div>
 
 

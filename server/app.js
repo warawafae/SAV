@@ -24,6 +24,8 @@ app.use(express.static(path.join(__dirname, "public")));
 app.use("/api/reclamations", require("./routes/reclamation"));
 const technicienRoutes = require("./routes/techniciens");
 app.use("/api/techniciens", technicienRoutes);
+const adminRoutes = require("./routes/admin");
+app.use("/admin", adminRoutes);
 // Setup EJS pour la page d'authentification côté serveur
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
