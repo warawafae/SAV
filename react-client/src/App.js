@@ -1,3 +1,4 @@
+//react router (navigation between page)
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Responsable from "./pages/Responsable";
 import ReclamationPage from "./pages/ReclamationPage";

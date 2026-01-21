@@ -1,13 +1,21 @@
+//react UI components
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 
-function HistoriqueTable({ enseigne }) {
+function HistoriqueTable({ enseigne, data: externalData }) {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedRec, setSelectedRec] = useState(null);
   const [updatedFields, setUpdatedFields] = useState({ duree_vie: '', statut_reclamation: '' });
 
   useEffect(() => {
+    // ✅ Si on reçoit des données en prop (ex: recherche), on les affiche directement
+    if (externalData) {
+      setData(externalData);
+      setLoading(false);
+      return;
+    }
+
     if (!enseigne) return;
 
     const user = JSON.parse(localStorage.getItem('user'));
@@ -32,7 +40,7 @@ function HistoriqueTable({ enseigne }) {
         console.error(err);
         setLoading(false);
       });
-  }, [enseigne]);
+  }, [enseigne, externalData]);
 
   const handleEdit = (field, value) => {
     setUpdatedFields(prev => ({ ...prev, [field]: value }));
@@ -41,7 +49,6 @@ function HistoriqueTable({ enseigne }) {
   const handleSave = () => {
     axios.put(`/api/reclamations/${enseigne}/${selectedRec.id}`, updatedFields)
       .then(() => {
-        // Mise à jour locale sans tout recharger
         setData(data.map(rec => rec.id === selectedRec.id ? { ...rec, ...updatedFields } : rec));
         setSelectedRec(null);
       })
@@ -52,104 +59,105 @@ function HistoriqueTable({ enseigne }) {
   };
 
   if (loading) return <p>Chargement...</p>;
-  if (data.length === 0) return <p>Aucune réclamation trouvée.</p>;
+  if (!data || data.length === 0) return <p>Aucune réclamation trouvée.</p>;
 
-  // … tout le code précédent reste identique jusqu’au return
-
-return (
-  <>
-    <h2 style={{ textAlign: 'center', marginBottom: '50px' }}>Historique des Réclamations</h2>
-    <table style={styles.table}>
-      <thead style={styles.thead}>
-        <tr>
-          <th>Date</th>
-          <th>Client</th>
-          <th>Libellé</th>
-          <th>Technicien</th>
-          <th>Durée vie</th>
-          <th>Statut</th>
-          <th>Action</th>
-        </tr>
-      </thead>
-      <tbody>
-        {data.map((rec, i) => (
-          <tr key={i} style={styles.row}>
-            <td>{new Date(rec.date_reclamation).toLocaleDateString()}</td>
-            <td>{rec.nom_client}</td>
-            <td>{rec.libelle}</td>
-            <td>{rec.nom_technicien}</td>
-            <td>{rec.duree_vie}</td>
-            <td>
-              <span style={{
-                ...styles.badge,
-                backgroundColor:
-                  rec.statut_reclamation === 'ouverte' ? '#e71809ff' :
-                  rec.statut_reclamation === 'en cours' ? '#0ea1d2ff' :
-                  '#1daf3fff'
-              }}>
-                {rec.statut_reclamation}
-              </span>
-            </td>
-            <td>
-              <button style={styles.button} onClick={() => {
-                setSelectedRec(rec);
-                setUpdatedFields({
-                  duree_vie: rec.duree_vie,
-                  statut_reclamation: rec.statut_reclamation
-                });
-              }}>
-                Consulter
-              </button>
-            </td>
+  return (
+    <>
+      <h2 style={{ textAlign: 'center', marginBottom: '50px' }}>Historique des Réclamations</h2>
+      <table style={styles.table}>
+        <thead style={styles.thead}>
+          <tr>
+            <th>Date</th>
+            <th>Client</th>
+            <th>Libellé</th>
+            <th>Technicien</th>
+            <th>Durée vie</th>
+            <th>Statut</th>
+            <th>Action</th>
           </tr>
-        ))}
-      </tbody>
-    </table>
+        </thead>
+        <tbody>
+          {data.map((rec, i) => (
+            <tr key={i} style={styles.row}>
+              <td>{new Date(rec.date_reclamation).toLocaleDateString()}</td>
+              <td>{rec.nom_client}</td>
+              <td>{rec.libelle}</td>
+              <td>{rec.nom_technicien}</td>
+              <td>{rec.duree_vie}</td>
+              <td>
+                <span style={{
+                  ...styles.badge,
+                  backgroundColor:
+                    rec.statut_reclamation === 'ouverte' ? '#e71809ff' :
+                    rec.statut_reclamation === 'en cours' ? '#0ea1d2ff' :
+                    '#1daf3fff'
+                }}>
+                  {rec.statut_reclamation}
+                </span>
+              </td>
+              <td>
+                <button style={styles.button} onClick={() => {
+                  setSelectedRec(rec);
+                  setUpdatedFields({
+                    duree_vie: rec.duree_vie,
+                    statut_reclamation: rec.statut_reclamation
+                  });
+                }}>
+                  Consulter
+                </button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
 
-    {selectedRec && (
-      <div style={styles.overlay}>
-        <div style={styles.modal}>
-          <h3 style={styles.modalTitle}>Détails de la réclamation</h3>
-          <div style={styles.modalContent}>
-            <p><strong>Date:</strong> {new Date(selectedRec.date_reclamation).toLocaleDateString()}</p>
-            <p><strong>Client:</strong> {selectedRec.nom_client}</p>
-            <p><strong>Téléphone:</strong> {selectedRec.numero_telephone}</p>
-            <p><strong>Libellé:</strong> {selectedRec.libelle}</p>
-            <p><strong>Contrat:</strong> {selectedRec.contrat}</p>
-            <p><strong>Motif:</strong> {selectedRec.motif}</p>
-            <p><strong>Technicien:</strong> {selectedRec.nom_technicien}</p>
-            <p><strong>Email:</strong> {selectedRec.email_technicien}</p>
+      {selectedRec && (
+        <div style={styles.overlay}>
+          <div style={styles.modal}>
+            <h3 style={styles.modalTitle}>Détails de la réclamation</h3>
+            <div style={styles.modalContent}>
+              <p><strong>Date:</strong> {new Date(selectedRec.date_reclamation).toLocaleDateString()}</p>
+              <p><strong>Client:</strong> {selectedRec.nom_client}</p>
+              <p><strong>Téléphone:</strong> {selectedRec.numero_telephone}</p>
+              <p><strong>Libellé:</strong> {selectedRec.libelle}</p>
+              <p><strong>Contrat:</strong> {selectedRec.contrat}</p>
+              <p><strong>Motif:</strong> {selectedRec.motif}</p>
+              <p><strong>Technicien:</strong> {selectedRec.nom_technicien}</p>
+              <p><strong>Email:</strong> {selectedRec.email_technicien}</p>
 
-            <label><strong>Durée de vie:</strong></label>
-            <input
-              type="text"
-              value={updatedFields.duree_vie}
-              onChange={(e) => handleEdit('duree_vie', e.target.value)}
-              style={styles.input}
-            />
+              <label><strong>Durée de vie:</strong></label>
+              <input
+                type="text"
+                value={updatedFields.duree_vie}
+                onChange={(e) => handleEdit('duree_vie', e.target.value)}
+                style={styles.input}
+              />
 
-            <label><strong>Statut:</strong></label>
-            <select
-              value={updatedFields.statut_reclamation}
-              onChange={(e) => handleEdit('statut_reclamation', e.target.value)}
-              style={styles.select}
-            >
-              <option value="ouverte">ouverte</option>
-              <option value="en cours">en cours</option>
-              <option value="terminée">terminée</option>
-            </select>
+              <label><strong>Statut:</strong></label>
+              <select
+                value={updatedFields.statut_reclamation}
+                onChange={(e) => handleEdit('statut_reclamation', e.target.value)}
+                style={styles.select}
+              >
+                <option value="ouverte">ouverte</option>
+                <option value="en cours">en cours</option>
+                <option value="terminée">terminée</option>
+              </select>
 
-            <div style={styles.modalActions}>
-              <button onClick={handleSave} style={styles.saveButton}>Enregistrer</button>
-              <button onClick={() => setSelectedRec(null)} style={styles.closeButton}>✖ Fermer</button>
+              <div style={styles.modalActions}>
+                <button onClick={handleSave} style={styles.saveButton}>Enregistrer</button>
+                <button onClick={() => setSelectedRec(null)} style={styles.closeButton}>✖ Fermer</button>
+              </div>
             </div>
           </div>
         </div>
-      </div>
-    )}
-  </>
-);}
+      )}
+    </>
+  );
+}
+
 export default HistoriqueTable;
+
 const styles = {
   table: {
     width: '100%',
@@ -159,7 +167,7 @@ const styles = {
     backgroundColor: '#ffffffe3'
   },
   thead: {
-    backgroundColor: 'rgb(102, 52, 3); ', //head of reclamtion table 
+    backgroundColor: 'rgba(73, 3, 3, 0.863);', // ❌ retiré le ";" qui causait ton warning
     color:'#ffffffe3'
   },
   row: {
@@ -168,7 +176,7 @@ const styles = {
   },
   button: {
     padding: '10px 10px',
-    backgroundColor: '#137065  ',
+    backgroundColor: '#137065',
     color: '#fff',
     border: 'none',
     borderRadius: '7px',
@@ -190,7 +198,7 @@ const styles = {
     boxShadow: '0 4px 15px rgba(0,0,0,0.3)', width: '450px'
   },
   modalTitle: {
-    marginBottom: 'px',
+    marginBottom: '10px',
     textAlign: 'center',
     fontSize: '20px',
     borderBottom: '1px solid #ccc',
@@ -224,7 +232,7 @@ const styles = {
     cursor: 'pointer'
   },
   closeButton: {
-    backgroundColor: '#137189ff ',
+    backgroundColor: '#137189ff',
     color: '#fff',
     padding: '8px 15px',
     border: 'none',

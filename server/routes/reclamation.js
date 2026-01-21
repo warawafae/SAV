@@ -116,7 +116,8 @@ router.get("/:enseigne", async (req, res) => {
       SELECT id, nom_client, date_reclamation, nom_technicien, duree_vie, libelle, motif, email_technicien, contrat, numero_telephone, statut_reclamation
       FROM ${table}
       WHERE nom_magasin = @nom_magasin
-      ORDER BY date_reclamation DESC
+      ORDER BY date_reclamation DESC 
+      OFFSET 0 ROWS FETCH NEXT 6 ROWS ONLY
     `;
 
     const result = await request.query(query);
@@ -207,4 +208,59 @@ router.get("/admin/all-reclamations", async (req, res) => {
     res.status(500).json({ error: "Erreur serveur" });
   }
 });
+// routes/reclamations.js
+
+
+
+// =========================
+// 🔎 Recherche par contrat
+// =========================
+router.get("/", async (req, res) => {
+  const { enseigne, contrat } = req.query;
+
+  if (!enseigne || !contrat) {
+    return res.status(400).json({ message: "Enseigne et contrat requis" });
+  }
+
+  let db, table;
+
+  if (enseigne.toLowerCase() === "marjane") {
+    db = dbMarjane;
+    table = "marjane_reclamations"; // ⚠️ Vérifie bien le vrai nom
+  } else if (enseigne.toLowerCase() === "electroplanet") {
+    db = dbElectroplanet;
+    table = "electroplanet_reclamations"; // ⚠️ Vérifie bien le vrai nom
+  } else {
+    return res.status(400).json({ message: "Enseigne inconnue" });
+  }
+
+  try {
+    await db.poolConnect;
+    const request = db.pool.request();
+
+    // Vérifie si `contrat` est VARCHAR ou INT dans SQL Server
+    request.input("contrat", sql.NVarChar(100), contrat);
+
+    const query = `
+      SELECT *
+      FROM ${table}
+      WHERE contrat = @contrat
+    `;
+
+    const result = await request.query(query);
+
+    if (result.recordset.length === 0) {
+      return res.status(404).json({ message: "Aucune réclamation trouvée" });
+    }
+
+    res.json(result.recordset);
+  } catch (err) {
+    console.error("❌ Erreur SQL:", err);
+    res.status(500).json({
+      message: "Erreur serveur lors de la recherche",
+      error: err.message,
+    });
+  }
+});
+
 module.exports = router;

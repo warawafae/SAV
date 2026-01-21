@@ -1,3 +1,4 @@
+//UI service +react UI components
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { Menu, X } from "lucide-react"; // ✅ pour l’icône sidebar
@@ -275,7 +276,7 @@ const handleSearch = async () => {
     }}
   />
   <button onClick={handleSearch}  style={{
-    backgroundColor: "#042a4dff",
+    backgroundColor: "#97077aff",
     color: "white",
     border: "none",
     padding: "8px 16px",

@@ -7,7 +7,7 @@
   align-items: center;
   gap: 15px;
   margin-bottom: 20px;
-  background: rgba(0, 0, 0, 0.1);
+  background: rgba(184, 154, 154, 0.056);
   padding: 12px 15px;
   border-radius: 8px;
   width: fit-content; /* s'adapte au contenu */
@@ -51,7 +51,7 @@
 /* --- Sidebar --- */
 .sidebar {
   width: 240px;
-  background-color:#605553;
+  background-color:#074437;
   color: rgb(255, 255, 255);
   padding: 20px;
   display: flex;
@@ -107,14 +107,14 @@
   text-align: center;
   padding: 12px;
   color: #fff;
-  background: #5e3737;
+  background: #1e0c48;
   border-radius: 6px;
   text-decoration: none;
   transition: background 0.3s;
 }
 
 .sidebar a:hover {
-  background: #c15d36;
+  background: #fefefe;
 }
 
 /* --- Contenu principal --- */
@@ -147,7 +147,7 @@ table {
 }
 
 thead {
-  background-color: rgb(102, 52, 3);
+  background-color: rgba(73, 3, 3, 0.863);
   color: white;
 }
 
@@ -217,7 +217,7 @@ tbody tr:hover {
 }
 
 .modal button[type="submit"] {
-  background: #4e342e;
+  background: #4aa584;
   color: white;
 }
 

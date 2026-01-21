@@ -62,16 +62,23 @@ app.get("/api/magasins/:enseigne", async (req, res) => {
 
 // Login : redirection vers frontend React (port 3000)
 app.post("/login", async (req, res) => {
-  const { enseigne, magasin, nom_responsable, password, email } = req.body;
+  const { enseigne, magasin, nom_responsable, password } = req.body;
+
+  // ✅ Cas 1 : Connexion administrateur
   if (
     nom_responsable === ADMIN_CREDENTIALS.username &&
     password === ADMIN_CREDENTIALS.password
   ) {
-    // Tu peux rendre une vue EJS spéciale...
-    // return res.render("admin", { nom: "Administrateur" });
-
-    // ✅ Ou rediriger vers une page frontend React avec le rôle admin
+    // Admin peut se connecter sans contraintes sur enseigne / magasin
     return res.redirect(`http://localhost:3000/admin?role=admin`);
+  }
+
+  // ⚠️ Cas 2 : Connexion responsable de magasin
+  // Vérification si enseigne ou magasin manquant
+  if (!enseigne || !magasin) {
+    return res
+      .status(400)
+      .send("Veuillez sélectionner une enseigne et un magasin pour continuer.");
   }
 
   let db, table;
@@ -83,7 +90,7 @@ app.post("/login", async (req, res) => {
     db = dbMarjane;
     table = "marjane_magasin";
   } else {
-    return res.send("Enseigne invalide.");
+    return res.status(400).send("Enseigne invalide.");
   }
 
   try {
@@ -101,12 +108,12 @@ app.post("/login", async (req, res) => {
 
     if (result.recordset.length > 0) {
       const user = result.recordset[0];
-      // Redirige vers React frontend (port 3000) avec query params enseigne et nomMagasin
+      // ✅ Redirection vers le tableau de bord du responsable
       return res.redirect(
         `http://localhost:3000/responsable?enseigne=${encodeURIComponent(enseigne)}&nomMagasin=${encodeURIComponent(magasin)}&nomResponsable=${encodeURIComponent(user.nom_complet_responsable)}`
       );
     } else {
-      res.send("Informations de connexion incorrectes.");
+      res.status(401).send("Informations de connexion incorrectes.");
     }
   } catch (err) {
     console.error("Erreur de login :", err);
